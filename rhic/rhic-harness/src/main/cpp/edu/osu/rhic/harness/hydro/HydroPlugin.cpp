@@ -67,6 +67,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   int nx = lattice->numLatticePointsX;
   int ny = lattice->numLatticePointsY;
   int nz = lattice->numLatticePointsRapidity;
+
+  if ( (nx < 2) || (ny < 2) || (nz < 2) ) printf("!simulation is not in 3+1d; freezeout finder will not work - fix this!\n");
   int ncx = lattice->numComputationalLatticePointsX;
   int ncy = lattice->numComputationalLatticePointsY;
   int ncz = lattice->numComputationalLatticePointsRapidity;
@@ -96,12 +98,32 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   //see example_4d() in example_cornelius
   //this works only for full 3+1 d simulation? need to find a way to generalize to n+1 d
   //if the user wants to run a boost invar calc. and sets nz=1, will the following code break?
-  int dim = 4;
-  double *lattice_spacing = new double[dim];
-  lattice_spacing[0] = dt;
-  lattice_spacing[1] = dx;
-  lattice_spacing[2] = dy;
-  lattice_spacing[3] = dz;
+
+  if ((nx > 2) && (ny > 2) && (nz > 2))
+    {
+      int dim = 4;
+      double *lattice_spacing = new double[dim];
+      lattice_spacing[0] = dt;
+      lattice_spacing[1] = dx;
+      lattice_spacing[2] = dy;
+      lattice_spacing[3] = dz;
+    }
+  else if ((nx > 2) && (ny > 2) && (nz < 2))
+    {
+      int dim = 3;
+      double *lattice_spacing = new double[dim];
+      lattice_spacing[0] = dt;
+      lattice_spacing[1] = dx;
+      lattice_spacing[2] = dy;
+    }
+  else if ((nx > 2) && (ny < 2) && (nz < 2))
+    {
+      int dim = 2;
+      double *lattice_spacing = new double[dim];
+      lattice_spacing[0] = dt;
+      lattice_spacing[1] = dx;
+    }
+
   Cornelius cor;
   cor.init(dim, freezeoutEnergyDensity, lattice_spacing);
   printf("cornelius initialized \n");
