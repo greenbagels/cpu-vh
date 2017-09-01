@@ -14,8 +14,8 @@
 
 //for cornelius, writing freezeout file
 #include <fstream>
-#include "/home/derek/MEGA/hydro-resources/cpu-vh-with-fo/freezeout/cornelius-c++-1.3/cornelius.cpp"
-#include "/home/derek/MEGA/hydro-resources/cpu-vh-with-fo/freezeout/FreezeOut.cpp"
+#include "/home/derek/github/cpu-vh/freezeout/cornelius-c++-1.3/cornelius.cpp"
+#include "/home/derek/github/cpu-vh/freezeout/FreezeOut.cpp"
 
 #include "edu/osu/rhic/harness/hydro/HydroPlugin.h"
 #include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
@@ -41,15 +41,15 @@ void outputDynamicalQuantities(double t, const char *outputDir, void * latticePa
   //	output(q->ttt, t, outputDir, "ttt", latticeParams);
   //	output(q->ttn, t, outputDir, "ttn", latticeParams);
   #ifdef PIMUNU
-  output(q->pixx, t, outputDir, "pixx", latticeParams);
-  output(q->pixy, t, outputDir, "pixy", latticeParams);
-  output(q->pixn, t, outputDir, "pixn", latticeParams);
-  output(q->piyy, t, outputDir, "piyy", latticeParams);
-  output(q->piyn, t, outputDir, "piyn", latticeParams);
-  output(q->pinn, t, outputDir, "pinn", latticeParams);
+  //output(q->pixx, t, outputDir, "pixx", latticeParams);
+  //output(q->pixy, t, outputDir, "pixy", latticeParams);
+  //output(q->pixn, t, outputDir, "pixn", latticeParams);
+  //output(q->piyy, t, outputDir, "piyy", latticeParams);
+  //output(q->piyn, t, outputDir, "piyn", latticeParams);
+  //output(q->pinn, t, outputDir, "pinn", latticeParams);
   #endif
   #ifdef PI
-  output(q->Pi, t, outputDir, "Pi", latticeParams);
+  //output(q->Pi, t, outputDir, "Pi", latticeParams);
   #endif
 
 }
