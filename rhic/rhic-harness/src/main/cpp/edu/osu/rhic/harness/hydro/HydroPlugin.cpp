@@ -275,10 +275,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     //also append all hydrodynamic variables to a storage array for freezeout info
 
     int nFO = n % FOFREQ;
-    //only true if number of ghost cells is 2 !fix this!
+    //only true if number of ghost cells is 2 !change this?!
     if(nFO == 0) //swap in the old values so that freezeout volume elements have overlap between calls to finder
     {
-      //printf("swapping in old values, n = %d\n", n);
       for (int ix = 2; ix < nx+2; ix++)
       {
         for (int iy = 2; iy < ny+2; iy++)
@@ -364,7 +363,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     else start = 0;
     if (nFO == FOFREQ - 1) //call the freezeout finder should this be put before the values are set?
     {
-      //printf("calling freezeout finder, n = %d\n", n);
       //besides writing centroid and normal to file, write all the hydro variables
       for (int it = start; it < FOFREQ; it++) //note* avoiding boundary problems (reading outside array)
       {
@@ -400,13 +398,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
               //write centroid and normal of each surface element to file
               for (int i = 0; i < cor.get_Nelements(); i++)
               {
-                //printf("writing to surface, n = %d\n", n);
                 double temp = 0.0; //temporary variable
                 //first write the position of the centroid of surface element
                 double cell_tau = t0 + ((double)(n + it)) * dt;
-                double cell_x = (double)ix * dx  - (((double)nx) / 2.0 * dx);
-                double cell_y = (double)iy * dy  - (((double)ny) / 2.0 * dy);
-                double cell_z = (double)iz * dz  - (((double)nz) / 2.0 * dz);
+                double cell_x = (double)ix * dx  - (((double)(nx-1)) / 2.0 * dx);
+                double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
+                double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
 
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,1) + cell_x << " ";
