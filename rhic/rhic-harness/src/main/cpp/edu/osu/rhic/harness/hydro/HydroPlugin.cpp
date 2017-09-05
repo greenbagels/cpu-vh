@@ -97,12 +97,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   //initialize cornelius for freezeout surface finding
   //see example_4d() in example_cornelius
   //this works only for full 3+1 d simulation? need to find a way to generalize to n+1 d
-  //if the user wants to run a boost invar calc. and sets nz=1, will the following code break?
-
+  int dim;
+  double *lattice_spacing;
   if ((nx > 2) && (ny > 2) && (nz > 2))
     {
-      int dim = 4;
-      double *lattice_spacing = new double[dim];
+      dim = 4;
+      lattice_spacing = new double[dim];
       lattice_spacing[0] = dt;
       lattice_spacing[1] = dx;
       lattice_spacing[2] = dy;
@@ -110,16 +110,16 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     }
   else if ((nx > 2) && (ny > 2) && (nz < 2))
     {
-      int dim = 3;
-      double *lattice_spacing = new double[dim];
+      dim = 3;
+      lattice_spacing = new double[dim];
       lattice_spacing[0] = dt;
       lattice_spacing[1] = dx;
       lattice_spacing[2] = dy;
     }
   else if ((nx > 2) && (ny < 2) && (nz < 2))
     {
-      int dim = 2;
-      double *lattice_spacing = new double[dim];
+      dim = 2;
+      lattice_spacing = new double[dim];
       lattice_spacing[0] = dt;
       lattice_spacing[1] = dx;
     }
@@ -271,20 +271,14 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
 
-    t1 = std::clock();
-    rungeKutta2(t, dt, q, Q, latticeParams, hydroParams);
-    t2 = std::clock();
-    double delta_time = (t2 - t1) / (double)(CLOCKS_PER_SEC / 1000);
-    if ((n-1) % FREQ == 0) printf("(Elapsed time: %.3f ms)\n",delta_time);
-    totalTime+=delta_time;
-    ++nsteps;
-
     //append the energy density to the storage array
     //also append all hydrodynamic variables to a storage array for freezeout info
 
     int nFO = n % FOFREQ;
+    //only true if number of ghost cells is 2 !fix this!
     if(nFO == 0) //swap in the old values so that freezeout volume elements have overlap between calls to finder
     {
+      //printf("swapping in old values, n = %d\n", n);
       for (int ix = 2; ix < nx+2; ix++)
       {
         for (int iy = 2; iy < ny+2; iy++)
@@ -364,16 +358,15 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
 
-    setCurrentConservedVariables();
-    //the zeroth time index of energy density and hydrodynamic_evoution arrays for the
-    // first FOFREQ steps has zeroes swapped in, so do not pass this part of arrays to freezeout finder
+    //the n=1 values are written to the it = 2 index of array, so don't start until here
     int start;
-    if (n <= FOFREQ) start = 1;
+    if (n <= FOFREQ) start = 2;
     else start = 0;
-    if (nFO == 0) //call the freezeout finder
+    if (nFO == FOFREQ - 1) //call the freezeout finder should this be put before the values are set?
     {
+      //printf("calling freezeout finder, n = %d\n", n);
       //besides writing centroid and normal to file, write all the hydro variables
-      for (int it = start; it < FOFREQ - 1; it++) //note* avoiding boundary problems (reading outside array)
+      for (int it = start; it < FOFREQ; it++) //note* avoiding boundary problems (reading outside array)
       {
         for (int ix = 0; ix < nx-1; ix++)
         {
@@ -407,9 +400,10 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
               //write centroid and normal of each surface element to file
               for (int i = 0; i < cor.get_Nelements(); i++)
               {
+                //printf("writing to surface, n = %d\n", n);
                 double temp = 0.0; //temporary variable
                 //first write the position of the centroid of surface element
-                double cell_tau = t0 + ((double)it) * dt;
+                double cell_tau = t0 + ((double)(n + it)) * dt;
                 double cell_x = (double)ix * dx  - (((double)nx) / 2.0 * dx);
                 double cell_y = (double)iy * dy  - (((double)ny) / 2.0 * dy);
                 double cell_z = (double)iz * dz  - (((double)nz) / 2.0 * dz);
@@ -472,12 +466,24 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                         hydrodynamic_evoution[15][it][ix+1][iy+1][iz], hydrodynamic_evoution[15][it][ix+1][iy][iz+1], hydrodynamic_evoution[15][it][ix][iy+1][iz+1],
                         hydrodynamic_evoution[15][it+1][ix+1][iy+1][iz], hydrodynamic_evoution[15][it+1][ix+1][iy][iz+1], hydrodynamic_evoution[15][it][ix+1][iy+1][iz+1], hydrodynamic_evoution[15][it+1][ix][iy+1][iz+1], hydrodynamic_evoution[15][it+1][ix+1][iy+1][iz+1]);
                         freezeoutSurfaceFile << hbarc * temp << endl;
-                      }
-                    }
-                  }
-                }
               }
             }
+          }
+        }
+      }
+    }
+
+
+    t1 = std::clock();
+    rungeKutta2(t, dt, q, Q, latticeParams, hydroParams);
+    t2 = std::clock();
+    double delta_time = (t2 - t1) / (double)(CLOCKS_PER_SEC / 1000);
+    if ((n-1) % FREQ == 0) printf("(Elapsed time: %.3f ms)\n",delta_time);
+    totalTime+=delta_time;
+    ++nsteps;
+
+    setCurrentConservedVariables();
+
 
             t = t0 + n * dt;
           }
