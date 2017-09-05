@@ -265,10 +265,10 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       n - 1, nt, t, e[sctr], p[sctr], effectiveTemperature(e[sctr])*hbarc);
       outputDynamicalQuantities(t, outputDir, latticeParams);
       // end hydrodynamic simulation if the temperature is below the freezeout temperature
-      if(e[sctr] < freezeoutEnergyDensity) {
-        printf("\nReached freezeout temperature at the center.\n");
-        break;
-      }
+      //if(e[sctr] < freezeoutEnergyDensity) {
+        //printf("\nReached freezeout temperature at the center.\n");
+        //break;
+      //}
     }
 
     //append the energy density to the storage array
