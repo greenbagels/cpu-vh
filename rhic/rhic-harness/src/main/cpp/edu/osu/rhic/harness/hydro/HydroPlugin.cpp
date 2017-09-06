@@ -12,10 +12,10 @@
 #include <ctime>
 #include <iostream>
 
-//for cornelius, writing freezeout file
+//for cornelius and writing freezeout file
 #include <fstream>
-#include "/home/derek/github/cpu-vh/freezeout/cornelius-c++-1.3/cornelius.cpp"
-#include "/home/derek/github/cpu-vh/freezeout/FreezeOut.cpp"
+#include "cornelius-c++-1.3/cornelius.cpp"
+#include "FreezeOut.cpp"
 
 #include "edu/osu/rhic/harness/hydro/HydroPlugin.h"
 #include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
@@ -226,11 +226,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   //open the freezeout surface file
   ofstream freezeoutSurfaceFile;
-  //char surfaceFilePath[255];
-  //sprintf(surfaceFilePath, "%s/freezeoutSurfaceFile.dat", cli.outputDirectory);
-  //freezeoutSurfaceFile.open(surfaceFilePath);
-  freezeoutSurfaceFile.open("output/freezeoutSurfaceFile.dat"); //find a way to do this using command line args
-  printf("freezeoutSurfaceFile.dat opened\n");
+  freezeoutSurfaceFile.open("output/freezeoutSurface.dat"); //find a way to do this using command line args
+  printf("freezeoutSurface.dat opened\n");
 
   /************************************************************************************	\
   * Fluid dynamic initialization

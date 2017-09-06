@@ -12,7 +12,7 @@ LINK_OPTIONS =
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS)
 COMPILER = nvcc
 LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest
-INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -I rhic/rhic-trunk/src/include -I rhic/rhic-harness/src/include
+INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -I rhic/rhic-trunk/src/include -I rhic/rhic-harness/src/include -I freezeout
 
 CPP := $(shell find $(DIR_SRC) -name '*.cpp')
 CPP_OBJ  = $(CPP:$(DIR_SRC)%.cpp=$(DIR_OBJ)%.o)
