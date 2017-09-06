@@ -401,10 +401,13 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                 double temp = 0.0; //temporary variable
                 //first write the position of the centroid of surface element
                 double cell_tau = t0 + ((double)(n + it)) * dt;
-                double cell_x = (double)ix * dx  - (((double)(nx-1)) / 2.0 * dx);
-                double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
-                double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
-
+                //double cell_x = (double)ix * dx  - (((double)(nx-1)) / 2.0 * dx);
+		//double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
+                //double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
+		double cell_x = (nx % 2 == 0) ? ((double)ix * dx  - (((double)(nx)) / 2.0 * dx)) : ((double)ix * dx  - (((double)(nx-1)) / 2.0 * dx));
+		double cell_y = (ny % 2 == 0) ? ((double)iy * dy  - (((double)(ny)) / 2.0 * dy)) : ((double)iy * dy  - (((double)(ny-1)) / 2.0 * dy));
+		double cell_z = (nz % 2 == 0) ? ((double)iz * dz  - (((double)(nz)) / 2.0 * dz)) : ((double)iz * dz  - (((double)(nz-1)) / 2.0 * dz));
+                
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,1) + cell_x << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << " ";
