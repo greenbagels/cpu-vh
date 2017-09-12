@@ -128,6 +128,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   cor.init(dim, freezeoutEnergyDensity, lattice_spacing);
   printf("cornelius initialized \n");
 
+  //define functions in Memory.cpp to calloc multidim arrays
+
   //make energy_density_evoution array a 1d column packed array for contiguous memory
   //as well as an easier port to GPU; use something like columnMajorLinearIndex() function
   double ****energy_density_evoution = (double ****)malloc((FOFREQ+1) * sizeof(double ***));
@@ -266,8 +268,29 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
         //printf("\nReached freezeout temperature at the center.\n");
         //break;
       //}
-    }
 
+      //if all cells are below freezeout temperature end hydro
+      //need a way to do this without interupting writing of surface file
+      /*
+      int accumulator = 0;
+      for (int ix = 2; ix < nx+2; ix++)
+      {
+        for (int iy = 2; iy < ny+2; iy++)
+        {
+          for (int iz = 2; iz < nz+2; iz++)
+          {
+            int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
+            if (e[s] > freezeoutEnergyDensity) accumulator = accumulator + 1;
+          }
+        }
+      }
+      if (accumulator == 0)
+      {
+        printf("\nAll cells are below freezeout temperature.\n");
+        break;
+      }
+    }
+    */
     //append the energy density to the storage array
     //also append all hydrodynamic variables to a storage array for freezeout info
 
@@ -399,12 +422,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                 //first write the position of the centroid of surface element
                 double cell_tau = t0 + ((double)(n + it)) * dt;
                 //double cell_x = (double)ix * dx  - (((double)(nx-1)) / 2.0 * dx);
-		//double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
+                //double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
                 //double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
-		double cell_x = (nx % 2 == 0) ? ((double)ix * dx  - (((double)(nx)) / 2.0 * dx)) : ((double)ix * dx  - (((double)(nx-1)) / 2.0 * dx));
-		double cell_y = (ny % 2 == 0) ? ((double)iy * dy  - (((double)(ny)) / 2.0 * dy)) : ((double)iy * dy  - (((double)(ny-1)) / 2.0 * dy));
-		double cell_z = (nz % 2 == 0) ? ((double)iz * dz  - (((double)(nz)) / 2.0 * dz)) : ((double)iz * dz  - (((double)(nz-1)) / 2.0 * dz));
-                
+                double cell_x = (nx % 2 == 0) ? ((double)ix * dx  - (((double)(nx)) / 2.0 * dx)) : ((double)ix * dx  - (((double)(nx-1)) / 2.0 * dx));
+                double cell_y = (ny % 2 == 0) ? ((double)iy * dy  - (((double)(ny)) / 2.0 * dy)) : ((double)iy * dy  - (((double)(ny-1)) / 2.0 * dy));
+                double cell_z = (nz % 2 == 0) ? ((double)iz * dz  - (((double)(nz)) / 2.0 * dz)) : ((double)iz * dz  - (((double)(nz-1)) / 2.0 * dz));
+
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,1) + cell_x << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << " ";
@@ -481,67 +504,67 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
     setCurrentConservedVariables();
 
+    t = t0 + n * dt;
+  }
+  printf("Average time/step: %.3f ms\n",totalTime/((double)nsteps));
 
-            t = t0 + n * dt;
-          }
-          printf("Average time/step: %.3f ms\n",totalTime/((double)nsteps));
+  freezeoutSurfaceFile.close();
+  printf("freezeoutSurfaceFile.dat closed\n");
+  /************************************************************************************	\
+  * Deallocate host memory
+  /************************************************************************************/
+  freeHostMemory();
+  printf("freed host memory\n");
 
-          freezeoutSurfaceFile.close();
-          printf("freezeoutSurfaceFile.dat closed\n");
-          /************************************************************************************	\
-          * Deallocate host memory
-          /************************************************************************************/
-          freeHostMemory();
-          printf("freed host memory\n");
+  //Deallocate memory used for freezeout finding
+  //define functions in Memory.cpp to free multidim arrays
 
-          //Deallocate memory used for freezeout finding
+  for (int it = 0; it < FOFREQ + 1; it++)
+  {
+    for (int ix = 0; ix < nx; ix++)
+    {
+      for (int iy = 0; iy < ny; iy++)
+      {
+        free(energy_density_evoution[it][ix][iy]);
+      }
+      free(energy_density_evoution[it][ix]);
+    }
+    free(energy_density_evoution[it]);
+  }
+  free(energy_density_evoution);
 
-          for (int it = 0; it < FOFREQ + 1; it++)
-          {
-            for (int ix = 0; ix < nx; ix++)
-            {
-              for (int iy = 0; iy < ny; iy++)
-              {
-                free(energy_density_evoution[it][ix][iy]);
-              }
-              free(energy_density_evoution[it][ix]);
-            }
-            free(energy_density_evoution[it]);
-          }
-          free(energy_density_evoution);
-
-          for (int ivar = 0; ivar < n_hydro_vars; ivar++)
-          {
-            for (int it = 0; it < FOFREQ + 1; it++)
-            {
-              for (int ix = 0; ix < nx; ix++)
-              {
-                for (int iy = 0; iy < ny; iy++)
-                {
-                  free(hydrodynamic_evoution[ivar][it][ix][iy]);
-                }
-                free(hydrodynamic_evoution[ivar][it][ix]);
-              }
-              free(hydrodynamic_evoution[ivar][it]);
-            }
-            free(hydrodynamic_evoution[ivar]);
-          }
-          free(hydrodynamic_evoution);
-
-          delete [] lattice_spacing;
-
-          for (int i1=0; i1 < 2; i1++)
-          {
-            for (int i2=0; i2 < 2; i2++)
-            {
-              for (int i3=0; i3 < 2; i3++)
-              {
-                delete[] hyperCube[i1][i2][i3];
-              }
-              delete[] hyperCube[i1][i2];
-            }
-            delete[] hyperCube[i1];
-          }
-          delete[] hyperCube;
-          printf("freed variables for freezeout\n");
+  for (int ivar = 0; ivar < n_hydro_vars; ivar++)
+  {
+    for (int it = 0; it < FOFREQ + 1; it++)
+    {
+      for (int ix = 0; ix < nx; ix++)
+      {
+        for (int iy = 0; iy < ny; iy++)
+        {
+          free(hydrodynamic_evoution[ivar][it][ix][iy]);
         }
+        free(hydrodynamic_evoution[ivar][it][ix]);
+      }
+      free(hydrodynamic_evoution[ivar][it]);
+    }
+    free(hydrodynamic_evoution[ivar]);
+  }
+  free(hydrodynamic_evoution);
+
+  delete [] lattice_spacing;
+
+  for (int i1=0; i1 < 2; i1++)
+  {
+    for (int i2=0; i2 < 2; i2++)
+    {
+      for (int i3=0; i3 < 2; i3++)
+      {
+        delete[] hyperCube[i1][i2][i3];
+      }
+      delete[] hyperCube[i1][i2];
+    }
+    delete[] hyperCube[i1];
+  }
+  delete[] hyperCube;
+  printf("freed variables for freezeout\n");
+}
