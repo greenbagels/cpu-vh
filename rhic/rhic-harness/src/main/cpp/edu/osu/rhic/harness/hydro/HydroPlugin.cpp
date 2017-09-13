@@ -16,6 +16,7 @@
 #include <fstream>
 #include "cornelius-c++-1.3/cornelius.cpp"
 #include "FreezeOut.cpp"
+#include "Memory.cpp"
 
 #include "edu/osu/rhic/harness/hydro/HydroPlugin.h"
 #include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
@@ -128,10 +129,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   cor.init(dim, freezeoutEnergyDensity, lattice_spacing);
   printf("cornelius initialized \n");
 
-  //define functions in Memory.cpp to calloc multidim arrays
+  double ****energy_density_evoution;
+  energy_density_evoution = calloc4dArray(energy_density_evoution, FOFREQ+1, nx, ny, nz);
 
   //make energy_density_evoution array a 1d column packed array for contiguous memory
   //as well as an easier port to GPU; use something like columnMajorLinearIndex() function
+  /*
   double ****energy_density_evoution = (double ****)malloc((FOFREQ+1) * sizeof(double ***));
   for (int it = 0; it < FOFREQ + 1; it++)
   {
@@ -159,9 +162,13 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
   }
+  */
   //make an array to store all the hydrodynamic variables for FOFREQ time steps
   //to be written to file once the freezeout surface is determined by the critical energy density
   int n_hydro_vars = 16; //u0, u1, u2, u3, e, pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33, Pi, the temperature and pressure are calclated with EoS
+  double *****hydrodynamic_evoution;
+  hydrodynamic_evoution = calloc5dArray(hydrodynamic_evoution, n_hydro_vars, FOFREQ+1, nx, ny, nz);
+  /*
   double *****hydrodynamic_evoution = (double *****)malloc((n_hydro_vars) * sizeof(double ****));
   for (int ivar = 0; ivar < n_hydro_vars; ivar++)
   {
@@ -196,9 +203,13 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
   }
+  */
   printf("storage arrays for energy density and hydrodynamic variables created and zeroed \n");
 
   //find a way to make this more compact/readable, and more readily parallelizable
+  double ****hyperCube;
+  hyperCube = calloc4dArray(hyperCube, 2, 2, 2, 2);
+  /*
   double ****hyperCube = new double***[2];
   for (int it = 0; it < 2; it++)
   {
@@ -225,7 +236,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
   }
-
+  */
   //open the freezeout surface file
   ofstream freezeoutSurfaceFile;
   freezeoutSurfaceFile.open("output/freezeoutSurface.dat"); //find a way to do this using command line args
@@ -255,6 +266,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   double totalTime = 0;
   int nsteps = 0;
 
+  int accumulator1 = 0;
+  int accumulator2 = 0;
   // evolve in time
   for (int n = 1; n <= nt+1; ++n)
   {
@@ -268,29 +281,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
         //printf("\nReached freezeout temperature at the center.\n");
         //break;
       //}
-
-      //if all cells are below freezeout temperature end hydro
-      //need a way to do this without interupting writing of surface file
-      /*
-      int accumulator = 0;
-      for (int ix = 2; ix < nx+2; ix++)
-      {
-        for (int iy = 2; iy < ny+2; iy++)
-        {
-          for (int iz = 2; iz < nz+2; iz++)
-          {
-            int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
-            if (e[s] > freezeoutEnergyDensity) accumulator = accumulator + 1;
-          }
-        }
-      }
-      if (accumulator == 0)
-      {
-        printf("\nAll cells are below freezeout temperature.\n");
-        break;
-      }
     }
-    */
+
     //append the energy density to the storage array
     //also append all hydrodynamic variables to a storage array for freezeout info
 
@@ -420,10 +412,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
               {
                 double temp = 0.0; //temporary variable
                 //first write the position of the centroid of surface element
-                double cell_tau = t0 + ((double)(n + it)) * dt;
-                //double cell_x = (double)ix * dx  - (((double)(nx-1)) / 2.0 * dx);
-                //double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
-                //double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
+                double cell_tau = t0 + ((double)(n - FOFREQ + it)) * dt; //check if this is the correct time!
                 double cell_x = (nx % 2 == 0) ? ((double)ix * dx  - (((double)(nx)) / 2.0 * dx)) : ((double)ix * dx  - (((double)(nx-1)) / 2.0 * dx));
                 double cell_y = (ny % 2 == 0) ? ((double)iy * dy  - (((double)(ny)) / 2.0 * dy)) : ((double)iy * dy  - (((double)(ny-1)) / 2.0 * dy));
                 double cell_z = (nz % 2 == 0) ? ((double)iz * dz  - (((double)(nz)) / 2.0 * dz)) : ((double)iz * dz  - (((double)(nz-1)) / 2.0 * dz));
@@ -493,6 +482,28 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
 
+    //if all cells are below freezeout temperature end hydro
+    //need a way to do this without interupting writing of surface file
+    accumulator1 = 0;
+    for (int ix = 2; ix < nx+2; ix++)
+    {
+      for (int iy = 2; iy < ny+2; iy++)
+      {
+        for (int iz = 2; iz < nz+2; iz++)
+        {
+          int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
+          if (e[s] > freezeoutEnergyDensity) accumulator1 = accumulator1 + 1;
+        }
+      }
+    }
+    if (accumulator1 == 0) accumulator2 += 1;
+    if (accumulator2 >= FOFREQ+1)
+    {
+      printf("\nAll cells have dropped below freezeout energy density\n");
+      break;
+    }
+
+
 
     t1 = std::clock();
     rungeKutta2(t, dt, q, Q, latticeParams, hydroParams);
@@ -517,8 +528,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   printf("freed host memory\n");
 
   //Deallocate memory used for freezeout finding
-  //define functions in Memory.cpp to free multidim arrays
-
+  free4dArray(energy_density_evoution, FOFREQ+1, nx, ny);
+  /*
   for (int it = 0; it < FOFREQ + 1; it++)
   {
     for (int ix = 0; ix < nx; ix++)
@@ -532,7 +543,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     free(energy_density_evoution[it]);
   }
   free(energy_density_evoution);
-
+  */
+  free5dArray(hydrodynamic_evoution, n_hydro_vars, FOFREQ+1, nx, ny);
+  /*
   for (int ivar = 0; ivar < n_hydro_vars; ivar++)
   {
     for (int it = 0; it < FOFREQ + 1; it++)
@@ -550,9 +563,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     free(hydrodynamic_evoution[ivar]);
   }
   free(hydrodynamic_evoution);
-
+  */
   delete [] lattice_spacing;
 
+  free4dArray(hyperCube, 2, 2, 2);
+  /*
   for (int i1=0; i1 < 2; i1++)
   {
     for (int i2=0; i2 < 2; i2++)
@@ -566,5 +581,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     delete[] hyperCube[i1];
   }
   delete[] hyperCube;
+  */
   printf("freed variables for freezeout\n");
 }
