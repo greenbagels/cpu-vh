@@ -94,7 +94,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   // allocate memory
   allocateHostMemory(nElements);
 
-  printf("Initializing cornelius for freezeout finding\n");
   //initialize cornelius for freezeout surface finding
   //see example_4d() in example_cornelius
   //this works only for full 3+1 d simulation? need to find a way to generalize to n+1 d
@@ -127,120 +126,25 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   Cornelius cor;
   cor.init(dim, freezeoutEnergyDensity, lattice_spacing);
-  printf("cornelius initialized \n");
 
   double ****energy_density_evoution;
   energy_density_evoution = calloc4dArray(energy_density_evoution, FOFREQ+1, nx, ny, nz);
 
   //make energy_density_evoution array a 1d column packed array for contiguous memory
-  //as well as an easier port to GPU; use something like columnMajorLinearIndex() function
-  /*
-  double ****energy_density_evoution = (double ****)malloc((FOFREQ+1) * sizeof(double ***));
-  for (int it = 0; it < FOFREQ + 1; it++)
-  {
-    energy_density_evoution[it] = (double ***)malloc(nx * sizeof(double **));
-    for (int ix = 0; ix < nx; ix++)
-    {
-      energy_density_evoution[it][ix] = (double **)malloc(ny * sizeof(double *));
-      for (int iy = 0; iy < ny; iy++)
-      {
-        energy_density_evoution[it][ix][iy] = (double *)malloc(nz * sizeof(double));
-      }
-    }
-  }
-  //zero the whole array
-  for (int it = 0; it < FOFREQ + 1; it++)
-  {
-    for (int ix = 0; ix < nx; ix++)
-    {
-      for (int iy = 0; iy < ny; iy++)
-      {
-        for (int iz = 0; iz < nz; iz++)
-        {
-          energy_density_evoution[it][ix][iy][iz] = 0.0;
-        }
-      }
-    }
-  }
-  */
+  //as well as an easier port to GPU
+
   //make an array to store all the hydrodynamic variables for FOFREQ time steps
   //to be written to file once the freezeout surface is determined by the critical energy density
   int n_hydro_vars = 16; //u0, u1, u2, u3, e, pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33, Pi, the temperature and pressure are calclated with EoS
   double *****hydrodynamic_evoution;
   hydrodynamic_evoution = calloc5dArray(hydrodynamic_evoution, n_hydro_vars, FOFREQ+1, nx, ny, nz);
-  /*
-  double *****hydrodynamic_evoution = (double *****)malloc((n_hydro_vars) * sizeof(double ****));
-  for (int ivar = 0; ivar < n_hydro_vars; ivar++)
-  {
-    hydrodynamic_evoution[ivar] = (double ****)malloc((FOFREQ + 1) * sizeof(double ***));
-    for (int it = 0; it < FOFREQ + 1; it++)
-    {
-      hydrodynamic_evoution[ivar][it] = (double ***)malloc(nx * sizeof(double **));
-      for (int ix = 0; ix < nx; ix++)
-      {
-        hydrodynamic_evoution[ivar][it][ix] = (double **)malloc(ny * sizeof(double *));
-        for (int iy = 0; iy < ny; iy++)
-        {
-          hydrodynamic_evoution[ivar][it][ix][iy] = (double *)malloc(nz * sizeof(double));
-        }
-      }
-    }
-  }
-  //zero the whole array
-  for (int ivar = 0; ivar < n_hydro_vars; ivar++)
-  {
-    for (int it = 0; it < FOFREQ + 1; it++)
-    {
-      for (int ix = 0; ix < nx; ix++)
-      {
-        for (int iy = 0; iy < ny; iy++)
-        {
-          for (int iz = 0; iz < nz; iz++)
-          {
-            hydrodynamic_evoution[ivar][it][ix][iy][iz] = 0.0;
-          }
-        }
-      }
-    }
-  }
-  */
-  printf("storage arrays for energy density and hydrodynamic variables created and zeroed \n");
 
   //find a way to make this more compact/readable, and more readily parallelizable
   double ****hyperCube;
   hyperCube = calloc4dArray(hyperCube, 2, 2, 2, 2);
-  /*
-  double ****hyperCube = new double***[2];
-  for (int it = 0; it < 2; it++)
-  {
-    hyperCube[it] = new double**[2];
-    for (int ix = 0; ix < 2; ix++)
-    {
-      hyperCube[it][ix] = new double*[2];
-      for (int iy = 0; iy < 2; iy++)
-      {
-        hyperCube[it][ix][iy] = new double[2];
-      }
-    }
-  }
-  for (int it = 0; it < 2; it++)
-  {
-    for (int ix = 0; ix < 2; ix++)
-    {
-      for (int iy = 0; iy < 2; iy++)
-      {
-        for(int iz = 0; iz < 2; iz++)
-        {
-          hyperCube[it][ix][iy][iz] = 0.0;
-        }
-      }
-    }
-  }
-  */
   //open the freezeout surface file
   ofstream freezeoutSurfaceFile;
   freezeoutSurfaceFile.open("output/freezeoutSurface.dat"); //find a way to do this using command line args
-  printf("freezeoutSurface.dat opened\n");
 
   /************************************************************************************	\
   * Fluid dynamic initialization
