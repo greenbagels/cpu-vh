@@ -191,9 +191,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     //also append all hydrodynamic variables to a storage array for freezeout info
 
     int nFO = n % FOFREQ;
-    //only true if number of ghost cells is 2 !change this?!
+
     if(nFO == 0) //swap in the old values so that freezeout volume elements have overlap between calls to finder
     {
+      swapAndSetHydroVariables(energy_density_evoution, hydrodynamic_evoution, q, e, u, nx, ny, nz, FOFREQ);
+      /*
       for (int ix = 2; ix < nx+2; ix++)
       {
         for (int iy = 2; iy < ny+2; iy++)
@@ -241,9 +243,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
           }
         }
       }
+      */
     }
     else //update the values of the rest of the array with current time step
     {
+      setHydroVariables(energy_density_evoution, hydrodynamic_evoution, q, e, u, nx, ny, nz, FOFREQ, n);
+      /*
       for (int ix = 2; ix < nx+2; ix++)
       {
         for (int iy = 2; iy < ny+2; iy++)
@@ -271,6 +276,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
           }
         }
       }
+      */
     }
 
     //the n=1 values are written to the it = 2 index of array, so don't start until here
@@ -279,6 +285,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     else start = 0;
     if (nFO == FOFREQ - 1) //call the freezeout finder should this be put before the values are set?
     {
+
       //besides writing centroid and normal to file, write all the hydro variables
       for (int it = start; it < FOFREQ; it++) //note* avoiding boundary problems (reading outside array)
       {
@@ -288,6 +295,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
           {
             for (int iz = 0; iz < nz-1; iz++)
             {
+              //writeEnergyDensityToHypercube()
               //write the values of energy density to all corners of the hyperCube
               hyperCube[0][0][0][0] = energy_density_evoution[it][ix][iy][iz];
               hyperCube[1][0][0][0] = energy_density_evoution[it+1][ix][iy][iz];

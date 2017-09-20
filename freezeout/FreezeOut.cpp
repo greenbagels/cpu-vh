@@ -1,3 +1,5 @@
+#include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
+
 //return a 4 dimensional linear interpolation inside the hypercube, given the values
 //on the corners (a0000 through a1111) and edge lengths x0 through x3
 double linearInterp4D(double x0, double x1, double x2, double x3,
@@ -25,4 +27,90 @@ double linearInterp4D(double x0, double x1, double x2, double x3,
             + ((x0) * (x1) * (x2) * (x3) * a1111);
 
   return result;
+}
+void swapAndSetHydroVariables(double ****energy_density_evoution, double *****hydrodynamic_evoution,
+                              CONSERVED_VARIABLES * const __restrict__ q, PRECISION * const __restrict__ e,
+                              FLUID_VELOCITY * const __restrict__ u, int nx, int ny, int nz, int FOFREQ)
+{
+  for (int ix = 2; ix < nx+2; ix++)
+  {
+    for (int iy = 2; iy < ny+2; iy++)
+    {
+      for (int iz = 2; iz < nz+2; iz++)
+      {
+        int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
+        //previous hydro variable values written to zeroth index
+        energy_density_evoution[0][ix-2][iy-2][iz-2] = energy_density_evoution[FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[0][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[0][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[1][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[1][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[2][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[2][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[3][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[3][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[4][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[4][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[5][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[5][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[6][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[6][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[7][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[7][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[8][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[8][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[9][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[9][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[10][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[10][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[11][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[11][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[12][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[12][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[13][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[13][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[14][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[14][FOFREQ][ix-2][iy-2][iz-2];
+        hydrodynamic_evoution[15][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[15][FOFREQ][ix-2][iy-2][iz-2];
+
+        //current hydro variable values written to first index
+        energy_density_evoution[1][ix-2][iy-2][iz-2] = (double)e[s];
+        hydrodynamic_evoution[0][1][ix-2][iy-2][iz-2] = (double)(u->ut[s]);
+        hydrodynamic_evoution[1][1][ix-2][iy-2][iz-2] = (double)(u->ux[s]);
+        hydrodynamic_evoution[2][1][ix-2][iy-2][iz-2] = (double)(u->uy[s]);
+        hydrodynamic_evoution[3][1][ix-2][iy-2][iz-2] = (double)(u->un[s]);
+        hydrodynamic_evoution[4][1][ix-2][iy-2][iz-2] = (double)(e[s]);
+        hydrodynamic_evoution[5][1][ix-2][iy-2][iz-2] = (double)(q->pitt[s]);
+        hydrodynamic_evoution[6][1][ix-2][iy-2][iz-2] = (double)(q->pitx[s]);
+        hydrodynamic_evoution[7][1][ix-2][iy-2][iz-2] = (double)(q->pity[s]);
+        hydrodynamic_evoution[8][1][ix-2][iy-2][iz-2] = (double)(q->pitn[s]);
+        hydrodynamic_evoution[9][1][ix-2][iy-2][iz-2] = (double)(q->pixx[s]);
+        hydrodynamic_evoution[10][1][ix-2][iy-2][iz-2] = (double)(q->pixy[s]);
+        hydrodynamic_evoution[11][1][ix-2][iy-2][iz-2] = (double)(q->pixn[s]);
+        hydrodynamic_evoution[12][1][ix-2][iy-2][iz-2] = (double)(q->piyy[s]);
+        hydrodynamic_evoution[13][1][ix-2][iy-2][iz-2] = (double)(q->piyn[s]);
+        hydrodynamic_evoution[14][1][ix-2][iy-2][iz-2] = (double)(q->pinn[s]);
+        hydrodynamic_evoution[15][1][ix-2][iy-2][iz-2] = (double)(q->Pi[s]);
+      }
+    }
+  }
+}
+
+void setHydroVariables(double ****energy_density_evoution, double *****hydrodynamic_evoution,
+                              CONSERVED_VARIABLES * const __restrict__ q, PRECISION * const __restrict__ e,
+                              FLUID_VELOCITY * const __restrict__ u, int nx, int ny, int nz, int FOFREQ, int n)
+{
+  int nFO = n % FOFREQ;
+  for (int ix = 2; ix < nx+2; ix++)
+  {
+    for (int iy = 2; iy < ny+2; iy++)
+    {
+      for (int iz = 2; iz < nz+2; iz++)
+      {
+        int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
+        energy_density_evoution[nFO+1][ix-2][iy-2][iz-2] = (double)e[s];
+        hydrodynamic_evoution[0][nFO+1][ix-2][iy-2][iz-2] = (double)(u->ut[s]);
+        hydrodynamic_evoution[1][nFO+1][ix-2][iy-2][iz-2] = (double)(u->ux[s]);
+        hydrodynamic_evoution[2][nFO+1][ix-2][iy-2][iz-2] = (double)(u->uy[s]);
+        hydrodynamic_evoution[3][nFO+1][ix-2][iy-2][iz-2] = (double)(u->un[s]);
+        hydrodynamic_evoution[4][nFO+1][ix-2][iy-2][iz-2] = (double)(e[s]);
+        hydrodynamic_evoution[5][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitt[s]);
+        hydrodynamic_evoution[6][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitx[s]);
+        hydrodynamic_evoution[7][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pity[s]);
+        hydrodynamic_evoution[8][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitn[s]);
+        hydrodynamic_evoution[9][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pixx[s]);
+        hydrodynamic_evoution[10][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pixy[s]);
+        hydrodynamic_evoution[11][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pixn[s]);
+        hydrodynamic_evoution[12][nFO+1][ix-2][iy-2][iz-2] = (double)(q->piyy[s]);
+        hydrodynamic_evoution[13][nFO+1][ix-2][iy-2][iz-2] = (double)(q->piyn[s]);
+        hydrodynamic_evoution[14][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pinn[s]);
+        hydrodynamic_evoution[15][nFO+1][ix-2][iy-2][iz-2] = (double)(q->Pi[s]);
+      }
+    }
+  }
 }
