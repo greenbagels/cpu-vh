@@ -130,9 +130,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   double ****energy_density_evoution;
   energy_density_evoution = calloc4dArray(energy_density_evoution, FOFREQ+1, nx, ny, nz);
 
-  //make energy_density_evoution array a 1d column packed array for contiguous memory
-  //as well as an easier port to GPU
-
   //make an array to store all the hydrodynamic variables for FOFREQ time steps
   //to be written to file once the freezeout surface is determined by the critical energy density
   int n_hydro_vars = 16; //u0, u1, u2, u3, e, pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33, Pi, the temperature and pressure are calclated with EoS
@@ -187,96 +184,16 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       //}
     }
 
-    //append the energy density to the storage array
-    //also append all hydrodynamic variables to a storage array for freezeout info
-
+    //append the energy density and all hydro variables to storage arrays
     int nFO = n % FOFREQ;
 
     if(nFO == 0) //swap in the old values so that freezeout volume elements have overlap between calls to finder
     {
       swapAndSetHydroVariables(energy_density_evoution, hydrodynamic_evoution, q, e, u, nx, ny, nz, FOFREQ);
-      /*
-      for (int ix = 2; ix < nx+2; ix++)
-      {
-        for (int iy = 2; iy < ny+2; iy++)
-        {
-          for (int iz = 2; iz < nz+2; iz++)
-          {
-            int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
-            //previous hydro variable values written to zeroth index
-            energy_density_evoution[0][ix-2][iy-2][iz-2] = energy_density_evoution[FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[0][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[0][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[1][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[1][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[2][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[2][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[3][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[3][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[4][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[4][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[5][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[5][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[6][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[6][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[7][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[7][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[8][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[8][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[9][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[9][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[10][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[10][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[11][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[11][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[12][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[12][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[13][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[13][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[14][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[14][FOFREQ][ix-2][iy-2][iz-2];
-            hydrodynamic_evoution[15][0][ix-2][iy-2][iz-2] = hydrodynamic_evoution[15][FOFREQ][ix-2][iy-2][iz-2];
-
-            //current hydro variable values written to first index
-            energy_density_evoution[1][ix-2][iy-2][iz-2] = (double)e[s];
-            hydrodynamic_evoution[0][1][ix-2][iy-2][iz-2] = (double)(u->ut[s]);
-            hydrodynamic_evoution[1][1][ix-2][iy-2][iz-2] = (double)(u->ux[s]);
-            hydrodynamic_evoution[2][1][ix-2][iy-2][iz-2] = (double)(u->uy[s]);
-            hydrodynamic_evoution[3][1][ix-2][iy-2][iz-2] = (double)(u->un[s]);
-            hydrodynamic_evoution[4][1][ix-2][iy-2][iz-2] = (double)(e[s]);
-            hydrodynamic_evoution[5][1][ix-2][iy-2][iz-2] = (double)(q->pitt[s]);
-            hydrodynamic_evoution[6][1][ix-2][iy-2][iz-2] = (double)(q->pitx[s]);
-            hydrodynamic_evoution[7][1][ix-2][iy-2][iz-2] = (double)(q->pity[s]);
-            hydrodynamic_evoution[8][1][ix-2][iy-2][iz-2] = (double)(q->pitn[s]);
-            hydrodynamic_evoution[9][1][ix-2][iy-2][iz-2] = (double)(q->pixx[s]);
-            hydrodynamic_evoution[10][1][ix-2][iy-2][iz-2] = (double)(q->pixy[s]);
-            hydrodynamic_evoution[11][1][ix-2][iy-2][iz-2] = (double)(q->pixn[s]);
-            hydrodynamic_evoution[12][1][ix-2][iy-2][iz-2] = (double)(q->piyy[s]);
-            hydrodynamic_evoution[13][1][ix-2][iy-2][iz-2] = (double)(q->piyn[s]);
-            hydrodynamic_evoution[14][1][ix-2][iy-2][iz-2] = (double)(q->pinn[s]);
-            hydrodynamic_evoution[15][1][ix-2][iy-2][iz-2] = (double)(q->Pi[s]);
-          }
-        }
-      }
-      */
     }
     else //update the values of the rest of the array with current time step
     {
       setHydroVariables(energy_density_evoution, hydrodynamic_evoution, q, e, u, nx, ny, nz, FOFREQ, n);
-      /*
-      for (int ix = 2; ix < nx+2; ix++)
-      {
-        for (int iy = 2; iy < ny+2; iy++)
-        {
-          for (int iz = 2; iz < nz+2; iz++)
-          {
-            int s = columnMajorLinearIndex(ix, iy, iz, nx+4, ny+4);
-            energy_density_evoution[nFO+1][ix-2][iy-2][iz-2] = (double)e[s];
-            hydrodynamic_evoution[0][nFO+1][ix-2][iy-2][iz-2] = (double)(u->ut[s]);
-            hydrodynamic_evoution[1][nFO+1][ix-2][iy-2][iz-2] = (double)(u->ux[s]);
-            hydrodynamic_evoution[2][nFO+1][ix-2][iy-2][iz-2] = (double)(u->uy[s]);
-            hydrodynamic_evoution[3][nFO+1][ix-2][iy-2][iz-2] = (double)(u->un[s]);
-            hydrodynamic_evoution[4][nFO+1][ix-2][iy-2][iz-2] = (double)(e[s]);
-            hydrodynamic_evoution[5][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitt[s]);
-            hydrodynamic_evoution[6][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitx[s]);
-            hydrodynamic_evoution[7][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pity[s]);
-            hydrodynamic_evoution[8][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitn[s]);
-            hydrodynamic_evoution[9][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pixx[s]);
-            hydrodynamic_evoution[10][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pixy[s]);
-            hydrodynamic_evoution[11][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pixn[s]);
-            hydrodynamic_evoution[12][nFO+1][ix-2][iy-2][iz-2] = (double)(q->piyy[s]);
-            hydrodynamic_evoution[13][nFO+1][ix-2][iy-2][iz-2] = (double)(q->piyn[s]);
-            hydrodynamic_evoution[14][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pinn[s]);
-            hydrodynamic_evoution[15][nFO+1][ix-2][iy-2][iz-2] = (double)(q->Pi[s]);
-          }
-        }
-      }
-      */
     }
 
     //the n=1 values are written to the it = 2 index of array, so don't start until here
@@ -297,24 +214,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
             {
               //write the values of energy density to all corners of the hyperCube
               writeEnergyDensityToHypercube(hyperCube, energy_density_evoution, it, ix, iy, iz);
-              /*
-              hyperCube[0][0][0][0] = energy_density_evoution[it][ix][iy][iz];
-              hyperCube[1][0][0][0] = energy_density_evoution[it+1][ix][iy][iz];
-              hyperCube[0][1][0][0] = energy_density_evoution[it][ix+1][iy][iz];
-              hyperCube[0][0][1][0] = energy_density_evoution[it][ix][iy+1][iz];
-              hyperCube[0][0][0][1] = energy_density_evoution[it][ix][iy][iz+1];
-              hyperCube[1][1][0][0] = energy_density_evoution[it+1][ix+1][iy][iz];
-              hyperCube[1][0][1][0] = energy_density_evoution[it+1][ix][iy+1][iz];
-              hyperCube[1][0][0][1] = energy_density_evoution[it+1][ix][iy][iz+1];
-              hyperCube[0][1][1][0] = energy_density_evoution[it][ix+1][iy+1][iz];
-              hyperCube[0][1][0][1] = energy_density_evoution[it][ix+1][iy][iz+1];
-              hyperCube[0][0][1][1] = energy_density_evoution[it][ix][iy+1][iz+1];
-              hyperCube[1][1][1][0] = energy_density_evoution[it+1][ix+1][iy+1][iz];
-              hyperCube[1][1][0][1] = energy_density_evoution[it+1][ix+1][iy][iz+1];
-              hyperCube[1][0][1][1] = energy_density_evoution[it+1][ix][iy+1][iz+1];
-              hyperCube[0][1][1][1] = energy_density_evoution[it][ix+1][iy+1][iz+1];
-              hyperCube[1][1][1][1] = energy_density_evoution[it+1][ix+1][iy+1][iz+1];
-              */
+
               //the freezeout surface file is written in the same format that is
               //written by MUSIC hydro code (see readFreezeOutSurface() in freeze.cpp)
 
@@ -326,9 +226,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                 double temp = 0.0; //temporary variable
                 //first write the position of the centroid of surface element
                 double cell_tau = t0 + ((double)(n - FOFREQ + it)) * dt; //check if this is the correct time!
-                double cell_x = (nx % 2 == 0) ? ((double)ix * dx  - (((double)(nx)) / 2.0 * dx)) : ((double)ix * dx  - (((double)(nx-1)) / 2.0 * dx));
-                double cell_y = (ny % 2 == 0) ? ((double)iy * dy  - (((double)(ny)) / 2.0 * dy)) : ((double)iy * dy  - (((double)(ny-1)) / 2.0 * dy));
-                double cell_z = (nz % 2 == 0) ? ((double)iz * dz  - (((double)(nz)) / 2.0 * dz)) : ((double)iz * dz  - (((double)(nz-1)) / 2.0 * dz));
+                double cell_x = (double)ix * dx  - (((double)(nx-1)) / 2.0 * dx);
+                double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
+                double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
 
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,1) + cell_x << " ";
