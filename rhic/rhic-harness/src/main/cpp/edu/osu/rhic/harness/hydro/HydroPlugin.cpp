@@ -100,29 +100,29 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   int dim;
   double *lattice_spacing;
   if ((nx > 2) && (ny > 2) && (nz > 2))
-    {
-      dim = 4;
-      lattice_spacing = new double[dim];
-      lattice_spacing[0] = dt;
-      lattice_spacing[1] = dx;
-      lattice_spacing[2] = dy;
-      lattice_spacing[3] = dz;
-    }
+  {
+    dim = 4;
+    lattice_spacing = new double[dim];
+    lattice_spacing[0] = dt;
+    lattice_spacing[1] = dx;
+    lattice_spacing[2] = dy;
+    lattice_spacing[3] = dz;
+  }
   else if ((nx > 2) && (ny > 2) && (nz < 2))
-    {
-      dim = 3;
-      lattice_spacing = new double[dim];
-      lattice_spacing[0] = dt;
-      lattice_spacing[1] = dx;
-      lattice_spacing[2] = dy;
-    }
+  {
+    dim = 3;
+    lattice_spacing = new double[dim];
+    lattice_spacing[0] = dt;
+    lattice_spacing[1] = dx;
+    lattice_spacing[2] = dy;
+  }
   else if ((nx > 2) && (ny < 2) && (nz < 2))
-    {
-      dim = 2;
-      lattice_spacing = new double[dim];
-      lattice_spacing[0] = dt;
-      lattice_spacing[1] = dx;
-    }
+  {
+    dim = 2;
+    lattice_spacing = new double[dim];
+    lattice_spacing[0] = dt;
+    lattice_spacing[1] = dx;
+  }
 
   Cornelius cor;
   cor.init(dim, freezeoutEnergyDensity, lattice_spacing);
@@ -179,8 +179,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       outputDynamicalQuantities(t, outputDir, latticeParams);
       // end hydrodynamic simulation if the temperature is below the freezeout temperature
       //if(e[sctr] < freezeoutEnergyDensity) {
-        //printf("\nReached freezeout temperature at the center.\n");
-        //break;
+      //printf("\nReached freezeout temperature at the center.\n");
+      //break;
       //}
     }
 
@@ -250,56 +250,28 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                 for (int ivar = 0; ivar < 4; ivar++)
                 {
                   temp = interpolateVariable(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                  /*
-                  temp = linearInterp4D(tau_frac, x_frac, y_frac, z_frac,
-                    hydrodynamic_evoution[ivar][it][ix][iy][iz], hydrodynamic_evoution[ivar][it+1][ix][iy][iz], hydrodynamic_evoution[ivar][it][ix+1][iy][iz], hydrodynamic_evoution[ivar][it][ix][iy+1][iz], hydrodynamic_evoution[ivar][it][ix][iy][iz+1],
-                    hydrodynamic_evoution[ivar][it+1][ix+1][iy][iz], hydrodynamic_evoution[ivar][it+1][ix][iy+1][iz], hydrodynamic_evoution[ivar][it+1][ix][iy][iz+1],
-                    hydrodynamic_evoution[ivar][it][ix+1][iy+1][iz], hydrodynamic_evoution[ivar][it][ix+1][iy][iz+1], hydrodynamic_evoution[ivar][it][ix][iy+1][iz+1],
-                    hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][iz], hydrodynamic_evoution[ivar][it+1][ix+1][iy][iz+1], hydrodynamic_evoution[ivar][it][ix+1][iy+1][iz+1], hydrodynamic_evoution[ivar][it+1][ix][iy+1][iz+1], hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][iz+1]);
-                    */
-                    freezeoutSurfaceFile << temp << " ";
-                  }
+                  freezeoutSurfaceFile << temp << " ";
+                }
 
-                  //write the energy density
-                  temp = interpolateVariable(hydrodynamic_evoution, 4, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                  /*
-                  temp = linearInterp4D(tau_frac, x_frac, y_frac, z_frac,
-                    hydrodynamic_evoution[4][it][ix][iy][iz], hydrodynamic_evoution[4][it+1][ix][iy][iz], hydrodynamic_evoution[4][it][ix+1][iy][iz], hydrodynamic_evoution[4][it][ix][iy+1][iz], hydrodynamic_evoution[4][it][ix][iy][iz+1],
-                    hydrodynamic_evoution[4][it+1][ix+1][iy][iz], hydrodynamic_evoution[4][it+1][ix][iy+1][iz], hydrodynamic_evoution[4][it+1][ix][iy][iz+1],
-                    hydrodynamic_evoution[4][it][ix+1][iy+1][iz], hydrodynamic_evoution[4][it][ix+1][iy][iz+1], hydrodynamic_evoution[4][it][ix][iy+1][iz+1],
-                    hydrodynamic_evoution[4][it+1][ix+1][iy+1][iz], hydrodynamic_evoution[4][it+1][ix+1][iy][iz+1], hydrodynamic_evoution[4][it][ix+1][iy+1][iz+1], hydrodynamic_evoution[4][it+1][ix][iy+1][iz+1], hydrodynamic_evoution[4][it+1][ix+1][iy+1][iz+1]);
-                    */
-                    freezeoutSurfaceFile << hbarc * temp << " "; //note factors of hbarc to give units (GeV/fm^3)
-                    //the temperature !this needs to be checked
-                    freezeoutSurfaceFile << hbarc * effectiveTemperature(temp) << " ";
-                    //the baryon chemical potential, writing zero for now
-                    freezeoutSurfaceFile << 0.0 << " ";
-                    //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
-                    double e_plus_P_over_T = (temp + equilibriumPressure(temp)) / effectiveTemperature(temp);
-                    freezeoutSurfaceFile << e_plus_P_over_T << " ";
-                    //write ten components of pi_(mu,nu) shear viscous tensor
-                    for (int ivar = 5; ivar < 15; ivar++)
-                    {
-                      temp = interpolateVariable(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                      /*
-                      temp = linearInterp4D(tau_frac, x_frac, y_frac, z_frac,
-                        hydrodynamic_evoution[ivar][it][ix][iy][iz], hydrodynamic_evoution[ivar][it+1][ix][iy][iz], hydrodynamic_evoution[ivar][it][ix+1][iy][iz], hydrodynamic_evoution[ivar][it][ix][iy+1][iz], hydrodynamic_evoution[ivar][it][ix][iy][iz+1],
-                        hydrodynamic_evoution[ivar][it+1][ix+1][iy][iz], hydrodynamic_evoution[ivar][it+1][ix][iy+1][iz], hydrodynamic_evoution[ivar][it+1][ix][iy][iz+1],
-                        hydrodynamic_evoution[ivar][it][ix+1][iy+1][iz], hydrodynamic_evoution[ivar][it][ix+1][iy][iz+1], hydrodynamic_evoution[ivar][it][ix][iy+1][iz+1],
-                        hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][iz], hydrodynamic_evoution[ivar][it+1][ix+1][iy][iz+1], hydrodynamic_evoution[ivar][it][ix+1][iy+1][iz+1], hydrodynamic_evoution[ivar][it+1][ix][iy+1][iz+1], hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][iz+1]);
-                        */
-                        freezeoutSurfaceFile << hbarc * temp << " ";
-                      }
-                      //write the bulk pressure Pi, and start a new line
-                      temp = interpolateVariable(hydrodynamic_evoution, 15, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                      /*
-                      temp = linearInterp4D(tau_frac, x_frac, y_frac, z_frac,
-                        hydrodynamic_evoution[15][it][ix][iy][iz], hydrodynamic_evoution[15][it+1][ix][iy][iz], hydrodynamic_evoution[15][it][ix+1][iy][iz], hydrodynamic_evoution[15][it][ix][iy+1][iz], hydrodynamic_evoution[15][it][ix][iy][iz+1],
-                        hydrodynamic_evoution[15][it+1][ix+1][iy][iz], hydrodynamic_evoution[15][it+1][ix][iy+1][iz], hydrodynamic_evoution[15][it+1][ix][iy][iz+1],
-                        hydrodynamic_evoution[15][it][ix+1][iy+1][iz], hydrodynamic_evoution[15][it][ix+1][iy][iz+1], hydrodynamic_evoution[15][it][ix][iy+1][iz+1],
-                        hydrodynamic_evoution[15][it+1][ix+1][iy+1][iz], hydrodynamic_evoution[15][it+1][ix+1][iy][iz+1], hydrodynamic_evoution[15][it][ix+1][iy+1][iz+1], hydrodynamic_evoution[15][it+1][ix][iy+1][iz+1], hydrodynamic_evoution[15][it+1][ix+1][iy+1][iz+1]);
-                        */
-                        freezeoutSurfaceFile << hbarc * temp << endl;
+                //write the energy density
+                temp = interpolateVariable(hydrodynamic_evoution, 4, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
+                freezeoutSurfaceFile << hbarc * temp << " "; //note factors of hbarc to give units (GeV/fm^3)
+                //the temperature !this needs to be checked
+                freezeoutSurfaceFile << hbarc * effectiveTemperature(temp) << " ";
+                //the baryon chemical potential, writing zero for now
+                freezeoutSurfaceFile << 0.0 << " ";
+                //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
+                double e_plus_P_over_T = (temp + equilibriumPressure(temp)) / effectiveTemperature(temp);
+                freezeoutSurfaceFile << e_plus_P_over_T << " ";
+                //write ten components of pi_(mu,nu) shear viscous tensor
+                for (int ivar = 5; ivar < 15; ivar++)
+                {
+                  temp = interpolateVariable(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
+                  freezeoutSurfaceFile << hbarc * temp << " ";
+                }
+                //write the bulk pressure Pi, and start a new line
+                temp = interpolateVariable(hydrodynamic_evoution, 15, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
+                freezeoutSurfaceFile << hbarc * temp << endl;
               }
             }
           }
@@ -354,58 +326,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   //Deallocate memory used for freezeout finding
   free4dArray(energy_density_evoution, FOFREQ+1, nx, ny);
-  /*
-  for (int it = 0; it < FOFREQ + 1; it++)
-  {
-    for (int ix = 0; ix < nx; ix++)
-    {
-      for (int iy = 0; iy < ny; iy++)
-      {
-        free(energy_density_evoution[it][ix][iy]);
-      }
-      free(energy_density_evoution[it][ix]);
-    }
-    free(energy_density_evoution[it]);
-  }
-  free(energy_density_evoution);
-  */
   free5dArray(hydrodynamic_evoution, n_hydro_vars, FOFREQ+1, nx, ny);
-  /*
-  for (int ivar = 0; ivar < n_hydro_vars; ivar++)
-  {
-    for (int it = 0; it < FOFREQ + 1; it++)
-    {
-      for (int ix = 0; ix < nx; ix++)
-      {
-        for (int iy = 0; iy < ny; iy++)
-        {
-          free(hydrodynamic_evoution[ivar][it][ix][iy]);
-        }
-        free(hydrodynamic_evoution[ivar][it][ix]);
-      }
-      free(hydrodynamic_evoution[ivar][it]);
-    }
-    free(hydrodynamic_evoution[ivar]);
-  }
-  free(hydrodynamic_evoution);
-  */
   delete [] lattice_spacing;
 
   free4dArray(hyperCube, 2, 2, 2);
-  /*
-  for (int i1=0; i1 < 2; i1++)
-  {
-    for (int i2=0; i2 < 2; i2++)
-    {
-      for (int i3=0; i3 < 2; i3++)
-      {
-        delete[] hyperCube[i1][i2][i3];
-      }
-      delete[] hyperCube[i1][i2];
-    }
-    delete[] hyperCube[i1];
-  }
-  delete[] hyperCube;
-  */
   printf("freed variables for freezeout\n");
 }
