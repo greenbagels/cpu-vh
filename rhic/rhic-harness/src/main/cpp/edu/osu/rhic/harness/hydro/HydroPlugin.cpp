@@ -99,7 +99,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   //this works only for full 3+1 d simulation? need to find a way to generalize to n+1 d
   int dim;
   double *lattice_spacing;
-  if ((nx > 2) && (ny > 2) && (nz > 2))
+  if ((nx > 1) && (ny > 1) && (nz > 1))
   {
     dim = 4;
     lattice_spacing = new double[dim];
@@ -108,7 +108,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     lattice_spacing[2] = dy;
     lattice_spacing[3] = dz;
   }
-  else if ((nx > 2) && (ny > 2) && (nz < 2))
+  else if ((nx > 1) && (ny > 1) && (nz < 2))
   {
     dim = 3;
     lattice_spacing = new double[dim];
@@ -116,7 +116,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     lattice_spacing[1] = dx;
     lattice_spacing[2] = dy;
   }
-  else if ((nx > 2) && (ny < 2) && (nz < 2))
+  else if ((nx > 1) && (ny < 2) && (nz < 2))
   {
     dim = 2;
     lattice_spacing = new double[dim];
@@ -280,7 +280,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
     }
 
     //if all cells are below freezeout temperature end hydro
-    //need a way to do this without interupting writing of surface file
     accumulator1 = 0;
     for (int ix = 2; ix < nx+2; ix++)
     {
@@ -294,7 +293,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       }
     }
     if (accumulator1 == 0) accumulator2 += 1;
-    if (accumulator2 >= FOFREQ+1)
+    if (accumulator2 >= FOFREQ+1) //only break once freezeout finder has had a chance to search/write to file
     {
       printf("\nAll cells have dropped below freezeout energy density\n");
       break;
