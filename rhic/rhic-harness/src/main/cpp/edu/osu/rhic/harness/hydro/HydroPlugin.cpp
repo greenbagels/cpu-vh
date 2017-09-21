@@ -299,8 +299,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       break;
     }
 
-
-
     t1 = std::clock();
     rungeKutta2(t, dt, q, Q, latticeParams, hydroParams);
     t2 = std::clock();
