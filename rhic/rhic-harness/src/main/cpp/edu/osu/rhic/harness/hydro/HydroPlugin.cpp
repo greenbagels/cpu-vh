@@ -314,12 +314,10 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   printf("Average time/step: %.3f ms\n",totalTime/((double)nsteps));
 
   freezeoutSurfaceFile.close();
-  printf("freezeoutSurfaceFile.dat closed\n");
   /************************************************************************************	\
   * Deallocate host memory
   /************************************************************************************/
   freeHostMemory();
-  printf("freed host memory\n");
 
   //Deallocate memory used for freezeout finding
   free4dArray(energy_density_evoution, FOFREQ+1, nx, ny);
@@ -327,5 +325,4 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
   delete [] lattice_spacing;
 
   free4dArray(hyperCube, 2, 2, 2);
-  printf("freed variables for freezeout\n");
 }
