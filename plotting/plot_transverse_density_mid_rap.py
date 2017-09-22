@@ -22,9 +22,9 @@ ynew = np.linspace(-ymax, ymax, num=ny)
 
 vnew = v.reshape(nz, ny, nx).transpose()
 
-front = vnew[:, :, 0]
-back = vnew[:, :, -1]
-middle = vnew[:, :, ((nz-1)/2)]
+front = vnew[:, :, 0].transpose()
+back = vnew[:, :, -1].transpose()
+middle = vnew[:, :, ((nz-1)/2)].transpose()
 
 fig, ax = plt.subplots()
 cset1 = ax.pcolormesh(xnew, ynew, middle)
@@ -33,4 +33,5 @@ plt.ylabel('y [fm]')
 plt.title('transverse energy density')
 cbar = plt.colorbar(cset1)
 cbar.ax.set_ylabel('energy density [fm^-4]')
+plt.gca().set_aspect('equal', adjustable='box')
 plt.show()
