@@ -5,12 +5,12 @@ DIR_BUILD      = $(DIR_MAIN)build/
 DIR_OBJ        = $(DIR_BUILD)rhic
 
 DEBUG =
-OPTIMIZATION = -O5  
+OPTIMIZATION = -O3 
 FLOWTRACE =
-OPTIONS =
-LINK_OPTIONS =
+OPTIONS = -std=c++11
+LINK_OPTIONS = -pthread
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS)
-COMPILER = nvcc
+COMPILER = c++
 LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest
 INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -I rhic/rhic-trunk/src/include -I rhic/rhic-harness/src/include -I freezeout
 
