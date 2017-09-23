@@ -1,5 +1,4 @@
 UNAME := $(shell uname)
-NVCC := $(shell command -v nvcc 2> /dev/null)
 
 DIR_MAIN       = ./
 DIR_SRC        = $(DIR_MAIN)rhic
@@ -12,16 +11,8 @@ FLOWTRACE =
 LDFLAGS=
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS) -Wno-comment
 
-ifdef NVCC
-COMPILER = nvcc
-OPTIMIZATION = -O5
-OPTIONS := $(OPTIONS) --relocatable-device-code=true -Wno-deprecated-gpu-targets
-LINK_OPTIONS := $(LINK_OPTIONS) --cudart static --relocatable-device-code=true -link -Wno-deprecated-gpu-targets
-endif
-ifndef NVCC
-COMPILER = gcc
+COMPILER = c++ -std=c++11
 OPTIMIZATION = -O3
-endif
 
 ifeq ($(UNAME), Linux)
 LIBS = -lm -lgsl -lgslcblas -lconfig
