@@ -1,3 +1,6 @@
+#include "Memory.h"
+#include <cstdlib>
+
 double ** calloc2dArray(double **array, int dim1, int dim2)
 {
   array = (double **)calloc(dim1, sizeof(double *));
@@ -83,6 +86,7 @@ void free3dArray(double ***array, int dim1, int dim2)
   }
   free(array);
 }
+
 void free4dArray(double ****array, int dim1, int dim2, int dim3)
 {
   for (int i1 = 0; i1 < dim1; i1++)
