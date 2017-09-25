@@ -31,6 +31,7 @@
 
 #define FREQ 10 //write output to file every FREQ timesteps
 #define FOFREQ 5 //call freezeout surface finder every FOFREQ timesteps
+#define FOTEST 1 //if true, freezeout surface file is written with proper times rounded (down) to step size
 
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
@@ -230,7 +231,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                 double cell_y = (double)iy * dy  - (((double)(ny-1)) / 2.0 * dy);
                 double cell_z = (double)iz * dz  - (((double)(nz-1)) / 2.0 * dz);
 
-                freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << " ";
+                if (FOTEST) {freezeoutSurfaceFile << cell_tau << " ";}
+                else {freezeoutSurfaceFile << cor.get_centroid_elem(i,0) + cell_tau << " ";}
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,1) + cell_x << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << " ";
                 freezeoutSurfaceFile << cor.get_centroid_elem(i,3) + cell_z << " ";
