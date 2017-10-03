@@ -28,6 +28,24 @@ double linearInterp4D(double x0, double x1, double x2, double x3,
 
   return result;
 }
+
+double linearInterp3D(double x0, double x1, double x2,
+                      double a000, double a100, double a010, double a001,
+                      double a110, double a101, double a011, double a111)
+{
+  double result = 0;
+  result = ((1-x0) * (1-x1) * (1-x2) * a000)
+            + ((x0) * (1-x1) * (1-x2) * a100)
+            + ((1-x0) * (x1) * (1-x2) * a010)
+            + ((1-x0) * (1-x1) * (x2) * a001)
+            + ((x0) * (x1) * (1-x2) * a110)
+            + ((x0) * (1-x1) * (x2) * a101)
+            + ((1-x0) * (x1) * (x2) * a011)
+            + ((x0) * (x1) * (x2)  * a111);
+
+  return result;
+}
+
 void swapAndSetHydroVariables(double ****energy_density_evoution, double *****hydrodynamic_evoution,
                               CONSERVED_VARIABLES * const __restrict__ q, PRECISION * const __restrict__ e,
                               FLUID_VELOCITY * const __restrict__ u, int nx, int ny, int nz, int FOFREQ)
@@ -114,7 +132,7 @@ void setHydroVariables(double ****energy_density_evoution, double *****hydrodyna
     }
   }
 }
-void writeEnergyDensityToHypercube(double ****hyperCube, double ****energy_density_evoution, int it, int ix, int iy, int iz)
+void writeEnergyDensityToHypercube4D(double ****hyperCube, double ****energy_density_evoution, int it, int ix, int iy, int iz)
 {
   hyperCube[0][0][0][0] = energy_density_evoution[it][ix][iy][iz];
   hyperCube[1][0][0][0] = energy_density_evoution[it+1][ix][iy][iz];
@@ -133,12 +151,31 @@ void writeEnergyDensityToHypercube(double ****hyperCube, double ****energy_densi
   hyperCube[0][1][1][1] = energy_density_evoution[it][ix+1][iy+1][iz+1];
   hyperCube[1][1][1][1] = energy_density_evoution[it+1][ix+1][iy+1][iz+1];
 }
-double interpolateVariable(double *****hydrodynamic_evoution, int ivar, int it, int ix, int iy, int iz, double tau_frac, double x_frac, double y_frac, double z_frac)
+void writeEnergyDensityToHypercube3D(double ***hyperCube, double ****energy_density_evoution, int it, int ix, int iy)
+{
+  hyperCube[0][0][0] = energy_density_evoution[it][ix][iy][0];
+  hyperCube[1][0][0] = energy_density_evoution[it+1][ix][iy][0];
+  hyperCube[0][1][0] = energy_density_evoution[it][ix+1][iy][0];
+  hyperCube[0][0][1] = energy_density_evoution[it][ix][iy+1][0];
+  hyperCube[1][1][0] = energy_density_evoution[it+1][ix+1][iy][0];
+  hyperCube[1][0][1] = energy_density_evoution[it+1][ix][iy+1][0];
+  hyperCube[0][1][1] = energy_density_evoution[it][ix+1][iy+1][0];
+  hyperCube[1][1][1] = energy_density_evoution[it+1][ix+1][iy+1][0];
+}
+double interpolateVariable4D(double *****hydrodynamic_evoution, int ivar, int it, int ix, int iy, int iz, double tau_frac, double x_frac, double y_frac, double z_frac)
 {
   double result = linearInterp4D(tau_frac, x_frac, y_frac, z_frac,
     hydrodynamic_evoution[ivar][it][ix][iy][iz], hydrodynamic_evoution[ivar][it+1][ix][iy][iz], hydrodynamic_evoution[ivar][it][ix+1][iy][iz], hydrodynamic_evoution[ivar][it][ix][iy+1][iz], hydrodynamic_evoution[ivar][it][ix][iy][iz+1],
     hydrodynamic_evoution[ivar][it+1][ix+1][iy][iz], hydrodynamic_evoution[ivar][it+1][ix][iy+1][iz], hydrodynamic_evoution[ivar][it+1][ix][iy][iz+1],
     hydrodynamic_evoution[ivar][it][ix+1][iy+1][iz], hydrodynamic_evoution[ivar][it][ix+1][iy][iz+1], hydrodynamic_evoution[ivar][it][ix][iy+1][iz+1],
     hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][iz], hydrodynamic_evoution[ivar][it+1][ix+1][iy][iz+1], hydrodynamic_evoution[ivar][it][ix+1][iy+1][iz+1], hydrodynamic_evoution[ivar][it+1][ix][iy+1][iz+1], hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][iz+1]);
+    return result;
+}
+
+double interpolateVariable3D(double *****hydrodynamic_evoution, int ivar, int it, int ix, int iy, double tau_frac, double x_frac, double y_frac)
+{
+  double result = linearInterp3D(tau_frac, x_frac, y_frac,
+    hydrodynamic_evoution[ivar][it][ix][iy][0], hydrodynamic_evoution[ivar][it+1][ix][iy][0], hydrodynamic_evoution[ivar][it][ix+1][iy][0], hydrodynamic_evoution[ivar][it][ix][iy+1][0],
+    hydrodynamic_evoution[ivar][it+1][ix+1][iy][0], hydrodynamic_evoution[ivar][it+1][ix][iy+1][0], hydrodynamic_evoution[ivar][it][ix+1][iy+1][0], hydrodynamic_evoution[ivar][it+1][ix+1][iy+1][0]);
     return result;
 }
