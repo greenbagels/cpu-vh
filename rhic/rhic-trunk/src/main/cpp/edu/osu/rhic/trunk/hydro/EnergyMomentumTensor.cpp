@@ -33,7 +33,7 @@ PRECISION energyDensityFromConservedVariables(PRECISION ePrev, PRECISION M0, PRE
 		PRECISION fp = 1 - ((cs2 - cst2)*(B + D*H - ((cs2 - cst2)*cst2*D*M0)/e0))/(cst2*e0*H);
 
 		PRECISION e = e0 - f/fp;
-		if(fabsf(e - e0) <=  0.1 * fabsf(e)) return e;
+		if(fabsf(e - e0) <=  0.001 * fabsf(e)) return e;
 		e0 = e;
 	}
 //	printf("Maximum number of iterations exceeded.\n");
@@ -109,11 +109,11 @@ PRECISION * const __restrict__ ut, PRECISION * const __restrict__ ux, PRECISION 
 		Pi = M / M0 - M0;
 #endif
 /****************************************************************************/
-	if (ePrev <= 0.1) {
-		*e = M0 - M / M0;
-	} else {
+	//if (ePrev <= 0.1) {
+	//	*e = M0 - M / M0;
+	//} else {
 		*e = energyDensityFromConservedVariables(ePrev, M0, M, Pi);
-	}
+	//}
 	if (isnan(*e)) {
 		printf("M0=%.3f,\t M1=%.3f,\t M2=%.3f,\t M3=%.3f\n", M0, M1, M2, M3);
 	}
