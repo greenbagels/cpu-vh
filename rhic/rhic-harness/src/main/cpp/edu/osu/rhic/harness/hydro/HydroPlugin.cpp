@@ -29,9 +29,10 @@
 #include "edu/osu/rhic/trunk/hydro/EnergyMomentumTensor.h"
 #include "edu/osu/rhic/trunk/eos/EquationOfState.h"
 
-#define FREQ 10 //write output to file every FREQ timesteps
-#define FOFREQ 5 //call freezeout surface finder every FOFREQ timesteps
-#define FOTEST 1 //if true, freezeout surface file is written with proper times rounded (down) to step size
+#define FREQ 100 //write output to file every FREQ timesteps
+#define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
+#define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
+#define FOFORMAT 1 // 0 : write f.o. surface to text file ;  1 : write to binary file
 
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
@@ -142,8 +143,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   //open the freezeout surface file
   ofstream freezeoutSurfaceFile;
-  freezeoutSurfaceFile.open("output/freezeoutSurface.dat"); //find a way to do this using command line args
-
+  if (FOFORMAT == 0) freezeoutSurfaceFile.open("output/freezeoutSurface.dat");
+  else freezeoutSurfaceFile.open("output/freezeoutSurface.dat", ios::binary);
   /************************************************************************************	\
   * Fluid dynamic initialization
   /************************************************************************************/
