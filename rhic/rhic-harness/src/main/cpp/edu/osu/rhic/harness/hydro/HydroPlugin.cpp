@@ -32,7 +32,7 @@
 #define FREQ 100 //write output to file every FREQ timesteps
 #define FOFREQ 10 //call freezeout surface finder every FOFREQ timesteps
 #define FOTEST 0 //if true, freezeout surface file is written with proper times rounded (down) to step size
-#define FOFORMAT 1 // 0 : write f.o. surface to ASCII file ;  1 : write to binary file
+#define FOFORMAT 0 // 0 : write f.o. surface to ASCII file ;  1 : write to binary file
 
 void outputDynamicalQuantities(double t, const char *outputDir, void * latticeParams)
 {
@@ -319,6 +319,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                   }
                 }
 
+                /*
                 else //write in binary
                 {
                   if (FOTEST) {freezeoutSurfaceFile.write(cell_tau, sizeof(double));}
@@ -394,6 +395,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     freezeoutSurfaceFile.write(hbarc * temp, sizeof(double));
                   }
                 }
+                */
               }
             }
           }
