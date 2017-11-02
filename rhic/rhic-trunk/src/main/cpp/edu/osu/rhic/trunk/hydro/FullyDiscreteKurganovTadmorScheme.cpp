@@ -23,7 +23,7 @@
 #include "edu/osu/rhic/core/util/FiniteDifference.h" //temp
 
 /**************************************************************************************************************************************************\
-void setNeighborCells(const PRECISION * const __restrict__ data, 
+void setNeighborCells(const PRECISION * const __restrict__ data,
 PRECISION * const __restrict__ I, PRECISION * const __restrict__ J, PRECISION * const __restrict__ K, PRECISION * const __restrict__ Q,
 int s, unsigned int n, int ptr, int simm, int sim, int sip, int sipp, int sjmm, int sjm, int sjp, int sjpp, int skmm, int skm, int skp, int skpp) {
 			PRECISION data_ns = data[s];
@@ -49,8 +49,8 @@ int s, unsigned int n, int ptr, int simm, int sim, int sip, int sipp, int sjmm, 
 			*(Q + n) = data_ns;
 }
 
-void eulerStepKernel(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
+void eulerStepKernel(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
 const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dz, PRECISION etabar
@@ -72,7 +72,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dz, PRECISION e
 				int simm = sim-1;
 				int sip = s+1;
 				int sipp = sip+1;
-	
+
 				int sjm = s-ncx;
 				int sjmm = sjm-ncx;
 				int sjp = s+ncx;
@@ -106,7 +106,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dz, PRECISION e
 				flux(K, hpz, &rightHalfCellExtrapolationForward, &leftHalfCellExtrapolationForward, &spectralRadiusZ, &Fz, t);
 				flux(K, hmz, &rightHalfCellExtrapolationBackwards, &leftHalfCellExtrapolationBackwards, &spectralRadiusZ, &Fz, t);
 
-				loadSourceTerms(I, J, K, Q, S, u->ut, u->ux, u->uy, u->un, up->ut[s], up->ux[s], up->uy[s], up->un[s], t, e[s], p, 
+				loadSourceTerms(I, J, K, Q, S, u->ut, u->ux, u->uy, u->un, up->ut[s], up->ux[s], up->uy[s], up->un[s], t, e[s], p,
 					i, j, k, s, ncx, ncy, ncz, dt, dx, dz, etabar);
 
 				PRECISION result[NUMBER_CONSERVED_VARIABLES];
@@ -135,10 +135,10 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dz, PRECISION e
 /**************************************************************************************************************************************************/
 
 /**************************************************************************************************************************************************/
-void setNeighborCellsJK2(const PRECISION * const __restrict__ in, PRECISION * const __restrict__ out, 
+void setNeighborCellsJK2(const PRECISION * const __restrict__ in, PRECISION * const __restrict__ out,
 int s, int ptr, int smm, int sm, int sp, int spp
 ) {
-	PRECISION data_ns = in[s];		
+	PRECISION data_ns = in[s];
 	*(out + ptr		) = in[smm];
 	*(out + ptr + 1) = in[sm];
 	*(out + ptr + 2) = data_ns;
@@ -146,8 +146,8 @@ int s, int ptr, int smm, int sm, int sp, int spp
 	*(out + ptr + 4) = in[spp];
 }
 
-void eulerStepKernelSource(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
+void eulerStepKernelSource(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
 const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz, PRECISION etabar
@@ -210,8 +210,8 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION d
 	}
 }
 
-void eulerStepKernelX(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
+void eulerStepKernelX(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx
 ) {
@@ -269,7 +269,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx
 				for (unsigned int n = 0; n < 4; ++n) {
 					*(result+n) *= dt;
 				}
-#endif	
+#endif
 				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n) {
 					*(result+n) *= dt;
 				}
@@ -298,8 +298,8 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx
 	}
 }
 
-void eulerStepKernelY(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
+void eulerStepKernelY(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy
 ) {
@@ -315,7 +315,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy
 				int sjmm = sjm-ncx;
 				int sjp = s+ncx;
 				int sjpp = sjp+ncx;
-	
+
 				int ptr=0;
 				setNeighborCellsJK2(currrentVars->ttt,J,s,ptr,sjmm,sjm,sjp,sjpp); ptr+=5;
 				setNeighborCellsJK2(currrentVars->ttx,J,s,ptr,sjmm,sjm,sjp,sjpp); ptr+=5;
@@ -386,8 +386,8 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy
 	}
 }
 
-void eulerStepKernelZ(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars, 
+void eulerStepKernelZ(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES * const __restrict__ updatedVars,
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 ) {
@@ -404,7 +404,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 				int skmm = skm-stride;
 				int skp = s+stride;
 				int skpp = skp+stride;
-	
+
 				int ptr=0;
 				setNeighborCellsJK2(currrentVars->ttt,K,s,ptr,skmm,skm,skp,skpp); ptr+=5;
 				setNeighborCellsJK2(currrentVars->ttx,K,s,ptr,skmm,skm,skp,skpp); ptr+=5;
@@ -519,9 +519,9 @@ int ncx, int ncy, int ncz
 
 /**************************************************************************************************************************************************/
 #ifndef IDEAL
-void 
-regulateDissipativeCurrents(PRECISION t, 
-const CONSERVED_VARIABLES * const __restrict__ currrentVars, 
+void
+regulateDissipativeCurrents(PRECISION t,
+const CONSERVED_VARIABLES * const __restrict__ currrentVars,
 const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u,
 int ncx, int ncy, int ncz
@@ -552,10 +552,10 @@ int ncx, int ncy, int ncz
 				PRECISION uy = u->uy[s];
 				PRECISION un = u->un[s];
 
-		//		PRECISION xi0 = (PRECISION)(0.01);
-		//		PRECISION rhomax = (PRECISION)(1.0);
-				PRECISION xi0 = (PRECISION)(0.1);
-				PRECISION rhomax = (PRECISION)(0.8);
+				PRECISION xi0 = (PRECISION)(1.0);
+				PRECISION rhomax = (PRECISION)(10.0);
+				//PRECISION xi0 = (PRECISION)(0.1);
+				//PRECISION rhomax = (PRECISION)(0.8);
 				PRECISION t2 = t*t;
 		//		PRECISION pipi = pitt*pitt-2*(pitx*pitx+pity*pity-pixy*pixy+t2*(pitn*pitn-pixn*pixn-piyn*piyn))+pixx*pixx+piyy*piyy+pinn*pinn*t2*t2;
 				PRECISION pipi = pitt*pitt-2*pitx*pitx-2*pity*pity+pixx*pixx+2*pixy*pixy+piyy*piyy-2*pitn*pitn*t2+2*pixn*pixn*t2+2*piyn*piyn*t2+pinn*pinn*t2*t2;
@@ -566,7 +566,7 @@ int ncx, int ncy, int ncz
 				PRECISION piu1 = -(pixn*t2*un) + pitx*ut - pixx*ux - pixy*uy;
 				PRECISION piu2 = -(piyn*t2*un) + pity*ut - pixy*ux - piyy*uy;
 				PRECISION piu3 = -(pinn*t2*un) + pitn*ut - pixn*ux - piyn*uy;
-		
+
 				PRECISION a1 = spipi/rhomax/sqrtf(e[s]*e[s]+3*p[s]*p[s]);
 		//if(isnan(a1)==1) printf("found a1 Nan\n");
 				PRECISION a2 = pimumu/xi0/rhomax/spipi;
@@ -596,7 +596,7 @@ int ncx, int ncy, int ncz
 				currrentVars->pixn[s] *= fac;
 				currrentVars->piyy[s] *= fac;
 				currrentVars->piyn[s] *= fac;
-				currrentVars->pinn[s] *= fac;	
+				currrentVars->pinn[s] *= fac;
 			}
 		}
 	}
@@ -605,8 +605,8 @@ int ncx, int ncy, int ncz
 /**************************************************************************************************************************************************/
 
 #define REGULATE_DISSIPATIVE_CURRENTS
-void 
-rungeKutta2(PRECISION t, PRECISION dt, CONSERVED_VARIABLES * __restrict__ q, CONSERVED_VARIABLES * __restrict__ Q, 
+void
+rungeKutta2(PRECISION t, PRECISION dt, CONSERVED_VARIABLES * __restrict__ q, CONSERVED_VARIABLES * __restrict__ Q,
 void * latticeParams, void * hydroParams
 ) {
 	struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
@@ -654,12 +654,11 @@ void * latticeParams, void * hydroParams
 	convexCombinationEulerStepKernel(q, Q, ncx, ncy, ncz);
 
 	swapFluidVelocity(&up, &u);
-	setInferredVariablesKernel(Q, e, p, u, t, latticeParams);		
+	setInferredVariablesKernel(Q, e, p, u, t, latticeParams);
 
-#ifdef REGULATE_DISSIPATIVE_CURRENTS	
+#ifdef REGULATE_DISSIPATIVE_CURRENTS
 	regulateDissipativeCurrents(t, Q, e, p, u, ncx, ncy, ncz);
 #endif
 
 	setGhostCells(Q, e, p, u, latticeParams);
 }
-
