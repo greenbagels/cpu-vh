@@ -492,6 +492,7 @@ int ncx, int ncy, int ncz
 				Q->tty[s] /= 2;
 				Q->ttn[s] += q->ttn[s];
 				Q->ttn[s] /= 2;
+				#ifdef PIMUNU
 				Q->pitt[s] += q->pitt[s];
 				Q->pitt[s] /= 2;
 				Q->pitx[s] += q->pitx[s];
@@ -512,6 +513,7 @@ int ncx, int ncy, int ncz
 				Q->piyn[s] /= 2;
 				Q->pinn[s] += q->pinn[s];
 				Q->pinn[s] /= 2;
+				#endif 
 			}
 		}
 	}
@@ -604,7 +606,7 @@ int ncx, int ncy, int ncz
 #endif
 /**************************************************************************************************************************************************/
 
-#define REGULATE_DISSIPATIVE_CURRENTS
+//#define REGULATE_DISSIPATIVE_CURRENTS
 void
 rungeKutta2(PRECISION t, PRECISION dt, CONSERVED_VARIABLES * __restrict__ q, CONSERVED_VARIABLES * __restrict__ Q,
 void * latticeParams, void * hydroParams

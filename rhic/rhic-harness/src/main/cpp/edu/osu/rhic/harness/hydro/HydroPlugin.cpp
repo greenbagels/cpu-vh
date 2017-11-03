@@ -253,9 +253,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                   else freezeoutSurfaceFile << cell_z << " ";
                   //then the surface normal element; note jacobian factors of +/- tau for milne coordinates
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,0) << " ";
-                  freezeoutSurfaceFile << (-1.0) * t * cor.get_normal_elem(i,1) << " ";
-                  freezeoutSurfaceFile << (-1.0) * t * cor.get_normal_elem(i,2) << " ";
-                  if (dim == 4) freezeoutSurfaceFile << (-1.0) * t * cor.get_normal_elem(i,3) << " ";
+                  freezeoutSurfaceFile << t * cor.get_normal_elem(i,1) << " ";
+                  freezeoutSurfaceFile << t * cor.get_normal_elem(i,2) << " ";
+                  if (dim == 4) freezeoutSurfaceFile << t * cor.get_normal_elem(i,3) << " ";
                   else freezeoutSurfaceFile << 0.0 << " ";
                   //write all the necessary hydro dynamic variables by first performing linear interpolation from values at
                   //corners of hypercube

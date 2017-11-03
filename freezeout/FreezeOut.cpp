@@ -83,6 +83,7 @@ void swapAndSetHydroVariables(double ****energy_density_evoution, double *****hy
         hydrodynamic_evoution[2][1][ix-2][iy-2][iz-2] = (double)(u->uy[s]);
         hydrodynamic_evoution[3][1][ix-2][iy-2][iz-2] = (double)(u->un[s]);
         hydrodynamic_evoution[4][1][ix-2][iy-2][iz-2] = (double)(e[s]);
+	#ifdef PIMUNU
         hydrodynamic_evoution[5][1][ix-2][iy-2][iz-2] = (double)(q->pitt[s]);
         hydrodynamic_evoution[6][1][ix-2][iy-2][iz-2] = (double)(q->pitx[s]);
         hydrodynamic_evoution[7][1][ix-2][iy-2][iz-2] = (double)(q->pity[s]);
@@ -93,7 +94,10 @@ void swapAndSetHydroVariables(double ****energy_density_evoution, double *****hy
         hydrodynamic_evoution[12][1][ix-2][iy-2][iz-2] = (double)(q->piyy[s]);
         hydrodynamic_evoution[13][1][ix-2][iy-2][iz-2] = (double)(q->piyn[s]);
         hydrodynamic_evoution[14][1][ix-2][iy-2][iz-2] = (double)(q->pinn[s]);
+	#endif 
+	#ifdef PI
         hydrodynamic_evoution[15][1][ix-2][iy-2][iz-2] = (double)(q->Pi[s]);
+	#endif
       }
     }
   }
@@ -117,6 +121,7 @@ void setHydroVariables(double ****energy_density_evoution, double *****hydrodyna
         hydrodynamic_evoution[2][nFO+1][ix-2][iy-2][iz-2] = (double)(u->uy[s]);
         hydrodynamic_evoution[3][nFO+1][ix-2][iy-2][iz-2] = (double)(u->un[s]);
         hydrodynamic_evoution[4][nFO+1][ix-2][iy-2][iz-2] = (double)(e[s]);
+	#ifdef PIMUNU
         hydrodynamic_evoution[5][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitt[s]);
         hydrodynamic_evoution[6][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pitx[s]);
         hydrodynamic_evoution[7][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pity[s]);
@@ -127,7 +132,10 @@ void setHydroVariables(double ****energy_density_evoution, double *****hydrodyna
         hydrodynamic_evoution[12][nFO+1][ix-2][iy-2][iz-2] = (double)(q->piyy[s]);
         hydrodynamic_evoution[13][nFO+1][ix-2][iy-2][iz-2] = (double)(q->piyn[s]);
         hydrodynamic_evoution[14][nFO+1][ix-2][iy-2][iz-2] = (double)(q->pinn[s]);
+	#endif
+	#ifdef PI
         hydrodynamic_evoution[15][nFO+1][ix-2][iy-2][iz-2] = (double)(q->Pi[s]);
+	#endif
       }
     }
   }
