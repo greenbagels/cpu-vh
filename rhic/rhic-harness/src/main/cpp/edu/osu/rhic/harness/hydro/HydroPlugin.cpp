@@ -251,7 +251,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                   freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << " ";
                   if (dim == 4) freezeoutSurfaceFile << cor.get_centroid_elem(i,3) + cell_z << " ";
                   else freezeoutSurfaceFile << cell_z << " ";
-                  //then the surface normal element; note jacobian factors of +/- tau for milne coordinates
+                  //then the surface normal element; note jacobian factors of tau for milne coordinates
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,0) << " ";
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,1) << " ";
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,2) << " ";
@@ -270,9 +270,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     }
                     //write the energy density
                     temp = interpolateVariable4D(hydrodynamic_evoution, 4, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                    freezeoutSurfaceFile << hbarc * temp << " "; //note factors of hbarc to give units (GeV/fm^3)
+                    freezeoutSurfaceFile << temp << " "; //note : iSpectra reads in file in fm^x units e.g. energy density should be written in fm^-4
                     //the temperature !this needs to be checked
-                    freezeoutSurfaceFile << hbarc * effectiveTemperature(temp) << " ";
+                    freezeoutSurfaceFile << effectiveTemperature(temp) << " ";
                     //the baryon chemical potential, writing zero for now
                     freezeoutSurfaceFile << 0.0 << " ";
                     //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
@@ -282,11 +282,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     for (int ivar = 5; ivar < 15; ivar++)
                     {
                       temp = interpolateVariable4D(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                      freezeoutSurfaceFile << hbarc * temp << " ";
+                      freezeoutSurfaceFile << temp << " ";
                     }
                     //write the bulk pressure Pi, and start a new line
                     temp = interpolateVariable4D(hydrodynamic_evoution, 15, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                    freezeoutSurfaceFile << hbarc * temp << endl;
+                    freezeoutSurfaceFile << temp << endl;
                   }
 
                   else //for 2+1D
@@ -299,9 +299,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     }
                     //write the energy density
                     temp = interpolateVariable3D(hydrodynamic_evoution, 4, it, ix, iy, tau_frac, x_frac, y_frac);
-                    freezeoutSurfaceFile << hbarc * temp << " "; //note factors of hbarc to give units (GeV/fm^3)
+                    freezeoutSurfaceFile << temp << " "; //note units of fm^-4 appropriate for iSpectra reading
                     //the temperature !this needs to be checked
-                    freezeoutSurfaceFile << hbarc * effectiveTemperature(temp) << " ";
+                    freezeoutSurfaceFile << effectiveTemperature(temp) << " ";
                     //the baryon chemical potential, writing zero for now
                     freezeoutSurfaceFile << 0.0 << " ";
                     //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
@@ -311,11 +311,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     for (int ivar = 5; ivar < 15; ivar++)
                     {
                       temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                      freezeoutSurfaceFile << hbarc * temp << " ";
+                      freezeoutSurfaceFile << temp << " ";
                     }
                     //write the bulk pressure Pi, and start a new line
                     temp = interpolateVariable3D(hydrodynamic_evoution, 15, it, ix, iy, tau_frac, x_frac, y_frac);
-                    freezeoutSurfaceFile << hbarc * temp << endl;
+                    freezeoutSurfaceFile << temp << endl;
                   }
                 }
 
@@ -347,9 +347,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     }
                     //write the energy density
                     temp = interpolateVariable4D(hydrodynamic_evoution, 4, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                    freezeoutSurfaceFile.write(hbarc * temp, sizeof(double));
+                    freezeoutSurfaceFile.write(temp, sizeof(double));
                     //the temperature !this needs to be checked
-                    freezeoutSurfaceFile.write(hbarc * effectiveTemperature(temp), sizeof(double));
+                    freezeoutSurfaceFile.write(effectiveTemperature(temp), sizeof(double));
                     //the baryon chemical potential, writing zero for now
                     freezeoutSurfaceFile.write(0.0, sizeof(double));
                     //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
@@ -359,11 +359,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     for (int ivar = 5; ivar < 15; ivar++)
                     {
                       temp = interpolateVariable4D(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                      freezeoutSurfaceFile.write(hbarc * temp, sizeof(double));
+                      freezeoutSurfaceFile.write(temp, sizeof(double));
                     }
                     //write the bulk pressure Pi, and start a new line
                     temp = interpolateVariable4D(hydrodynamic_evoution, 15, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
-                    freezeoutSurfaceFile.write(hbarc * temp, sizeof(double));
+                    freezeoutSurfaceFile.write(temp, sizeof(double));
                   }
 
                   else //for 2+1D
@@ -376,9 +376,9 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     }
                     //write the energy density
                     temp = interpolateVariable3D(hydrodynamic_evoution, 4, it, ix, iy, tau_frac, x_frac, y_frac);
-                    freezeoutSurfaceFile.write(hbarc * temp, sizeof(double)); //note factors of hbarc to give units (GeV/fm^3)
+                    freezeoutSurfaceFile.write(temp, sizeof(double)); //note factors of hbarc to give units (GeV/fm^3)
                     //the temperature !this needs to be checked
-                    freezeoutSurfaceFile.write(hbarc * effectiveTemperature(temp), sizeof(double));
+                    freezeoutSurfaceFile.write(effectiveTemperature(temp), sizeof(double));
                     //the baryon chemical potential, writing zero for now
                     freezeoutSurfaceFile.write(0.0, sizeof(double));
                     //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
@@ -388,11 +388,11 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     for (int ivar = 5; ivar < 15; ivar++)
                     {
                       temp = interpolateVariable3D(hydrodynamic_evoution, ivar, it, ix, iy, tau_frac, x_frac, y_frac);
-                      freezeoutSurfaceFile.write(hbarc * temp, sizeof(double));
+                      freezeoutSurfaceFile.write(temp, sizeof(double));
                     }
                     //write the bulk pressure Pi, and start a new line
                     temp = interpolateVariable3D(hydrodynamic_evoution, 15, it, ix, iy, tau_frac, x_frac, y_frac);
-                    freezeoutSurfaceFile.write(hbarc * temp, sizeof(double));
+                    freezeoutSurfaceFile.write(temp, sizeof(double));
                   }
                 }
                 */
