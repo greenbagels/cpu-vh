@@ -11,15 +11,64 @@
 #include <stdbool.h>
 #include <argp.h>
 
-struct CommandLineArguments
+namespace rhic
 {
-  char *args[2];            /* ARG1 and ARG2 */
-  bool runTest;
-  bool runHydro;
-  char *configDirectory;              /* The -v flag */
-  char *outputDirectory;            /* Argument for -o */
-};
+	class cli_arguments
+	{
+		public:
+			cli_arguments();
+			/*
+			   PARSER. Field 2 in ARGP.
+			   Order of parameters: KEY, ARG, STATE.
+			*/
+			error_t parse_opt(int key, char *arg, struct argp_state *state);
+			/*
+				 The main function.
+				 Notice how now the only function call needed to process
+				 all command-line options and arguments nicely
+				 is argp_parse.
+			*/
+			error_t load_cli_args(int argc, char **argv);
 
-error_t loadCommandLineArguments(int argc, char **argv, void * cli_params, const char *version, const char *address);
+		private:
+			struct cli_args
+			{
+				std::array<std::string, 2> args;            /* ARG1 and ARG2 */
+				bool run_test = false;
+				bool run_hydro = false;
+				std::string config_dir;              /* The -v flag */
+				std::string output_dir;            /* Argument for -o */
+			};
+
+			std::string argp_program_ver;
+			std::string argp_program_bug_addr;
+
+			/*
+				 OPTIONS.  Field 1 in ARGP.
+				 Order of fields: {NAME, KEY, ARG, FLAGS, DOC}.
+			*/
+			std::array<struct argp_option, 5> options;
+
+			/*
+				 ARGS_DOC. Field 3 in ARGP.
+				 A description of the non-option command-line arguments
+					 that we accept.
+			*/
+			std::string args_doc;
+
+			/*
+				DOC.  Field 4 in ARGP.
+				Program documentation.
+			*/
+			std::string doc;
+
+			/*
+				 The ARGP structure itself.
+			*/
+			struct argp argp; 
+
+			struct cli_args cli_args;
+	}
+}
 
 #endif /* COMMANDLINEARGUMENTS_H_ */

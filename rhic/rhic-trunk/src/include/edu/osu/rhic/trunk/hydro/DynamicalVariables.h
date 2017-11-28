@@ -8,104 +8,57 @@
 #ifndef DYNAMICALVARIABLES_H_
 #define DYNAMICALVARIABLES_H_
 
-#define NUMBER_CONSERVATION_LAWS 4
+#include <array>
+#include <vector>
+#include "LatticeParameters.h"
+#include "util.h"
 
-//#define PIMUNU 
-//#define PI
-
-/*********************************************************/
-#ifndef PI
-#define NUMBER_PI_COMPONENTS 0
-#else
-#define NUMBER_PI_COMPONENTS 1
-#endif
-
-#ifndef VMU
-#define NUMBER_PROPAGATED_VMU_COMPONENTS 0
-#else
-#define NUMBER_PROPAGATED_VMU_COMPONENTS 4
-#endif
-
-#ifndef PIMUNU
-#define NUMBER_PROPAGATED_PIMUNU_COMPONENTS 0
-#else
-#define NUMBER_PROPAGATED_PIMUNU_COMPONENTS 10
-#endif
-
-#define NUMBER_DISSIPATIVE_CURRENTS (NUMBER_PI_COMPONENTS+NUMBER_PROPAGATED_VMU_COMPONENTS+NUMBER_PROPAGATED_PIMUNU_COMPONENTS)
-
-#if NUMBER_DISSIPATIVE_CURRENTS==0
-#define IDEAL
-#endif
-
-#define NUMBER_CONSERVED_VARIABLES (NUMBER_CONSERVATION_LAWS+NUMBER_DISSIPATIVE_CURRENTS)
-/*********************************************************/
-
-#define PRECISION float
-
-typedef struct 
+namespace rhic
 {
-	PRECISION *ttt;
-	PRECISION *ttx;
-	PRECISION *tty;
-	PRECISION *ttn;
-#ifdef PIMUNU
-	PRECISION *pitt;
-	PRECISION *pitx;
-	PRECISION *pity;
-	PRECISION *pitn;
-	PRECISION *pixx;
-	PRECISION *pixy;
-	PRECISION *pixn;
-	PRECISION *piyy;
-	PRECISION *piyn;
-	PRECISION *pinn;
-#endif
-#ifdef PI
-	PRECISION *Pi;
-#endif
-} CONSERVED_VARIABLES;
+	using precision_t = double;
+	
+	class dynamical_variables
+	{
+		public:
+			dynamical_variables(unsigned con_law, pi_comp, vmu_comp, pimunu_comp);
+			int col_maj_linear_index(int i, int j, int k, int nx, int ny);
+			void set_conserved_vars(lattice_params &params);
+			void set_current_conserved_vars();
+			void swap_fluid_velocity(fluid_velocity &, fluid_velocity &);
+			void set_ghost_cells(lattice_params &params);
+			void setGhostCellsKernelI(lattice_params &params);
+			void setGhostCellsKernelJ(lattice_params &params);
+			void setGhostCellsKernelK(lattice_params &params);
 
-typedef struct 
-{
-	PRECISION *ut;
-	PRECISION *ux;
-	PRECISION *uy;
-	PRECISION *un;
-} FLUID_VELOCITY;
+		private:
+			template<typename T>
+			struct conserved_variables {
+				std::array<std::vector<T>,4> t;
+				util::diagonal_matrix<std::vector<T>> pi(4,4);
+				std::vector<T> Pi;
+			}
 
-extern CONSERVED_VARIABLES *q,*Q,*qS;
-extern FLUID_VELOCITY *u,*up,*uS,*uSS;
-extern PRECISION *e, *p;
+			enum coord {
+				t,
+				x,
+				y,
+				z
+			};
 
-int columnMajorLinearIndex(int i, int j, int k, int nx, int ny);
 
-void allocateHostMemory(int len);
+			using fluid_velocity = std::array<std::vector<precision_t>, 4>;
 
-void setConservedVariables(double t, void * latticeParams);
-void setCurrentConservedVariables();
-void swapFluidVelocity(FLUID_VELOCITY **arr1, FLUID_VELOCITY **arr2) ;
+			unsigned number_conservation_laws;
+			unsigned number_pi_components;
+			unsigned number_propagated_vmu_components;
+			unsigned number_propagated_pimunu_components;
+			unsigned number_dissipative_currents;
+			unsigned number_conserved_variables;
+			bool is_ideal;
 
-void setGhostCells(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
-FLUID_VELOCITY * const __restrict__ u, void * latticeParams
-);
-
-void setGhostCellsKernelI(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
-FLUID_VELOCITY * const __restrict__ u, void * latticeParams
-);
-
-void setGhostCellsKernelJ(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
-FLUID_VELOCITY * const __restrict__ u, void * latticeParams
-);
-
-void setGhostCellsKernelK(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
-FLUID_VELOCITY * const __restrict__ u, void * latticeParams
-);
-
-void freeHostMemory();
-
+			conserved_variables<precision_t> q, Q, qS;
+			fluid_velocity u, up, uS, uSS;
+			std::vector<precision_t> e, p;
+	}
+}
 #endif /* DYNAMICALVARIABLES_H_ */

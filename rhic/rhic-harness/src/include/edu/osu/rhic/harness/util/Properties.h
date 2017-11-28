@@ -8,9 +8,12 @@
 #ifndef PROPERTIES_H_
 #define PROPERTIES_H_
 
-#include <libconfig.h>
+#include <libconfig.h++>
 
-void getIntegerProperty(config_t *cfg, const char* propName, int *propValue, int defaultValue);
-void getDoubleProperty(config_t *cfg, const char* propName, double *propValue, double defaultValue);
+namespace rhic
+{
+	template<typename T>
+	void get_prop(libconfig::Config &cfg, const char *prop_name, T &prop_val, T default_val);
+}
 
 #endif /* PROPERTIES_H_ */

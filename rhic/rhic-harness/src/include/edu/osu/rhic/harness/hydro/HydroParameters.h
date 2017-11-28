@@ -8,18 +8,22 @@
 #ifndef HYDROPARAMETERS_H_
 #define HYDROPARAMETERS_H_
 
-#include <libconfig.h>
-
+#include <libconfig.h++>
 #include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
+#include "parameters.h"
 
-struct HydroParameters
+namespace rhic
 {
-	double initialProperTimePoint;
-	double shearViscosityToEntropyDensity;
-	double freezeoutTemperatureGeV;
-	int initializePimunuNavierStokes;
-};
+	struct hydro_parameters : parameters
+	{
+		hydro_parameters(libconfig::Config &cfg, std::string &config_dir);
+		void load_params(libconfig::Config &cfg, std::string &config_dir) override;  
 
-void loadHydroParameters(config_t *cfg, const char* configDirectory, void * params);
+		double initialProperTimePoint;
+		double shearViscosityToEntropyDensity;
+		double freezeoutTemperatureGeV;
+		int initializePimunuNavierStokes;
+	};
+}
 
 #endif /* HYDROPARAMETERS_H_ */

@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h> // for printf
 #include <sys/time.h> // for timing
-#include <unistd.h>		// for current working directory
-#include <libconfig.h>
+//#include <unistd.h>		// for current working directory
+#include <libconfig.h++> // not a typo, switch to the C++ API
 
 //#include "gtest/gtest.h" // for unit testing
 
@@ -22,60 +22,39 @@
 #include "edu/osu/rhic/harness/hydro/HydroParameters.h"
 #include "edu/osu/rhic/harness/hydro/HydroPlugin.h"
 
-const char *version = "";
-const char *address = "";
 /*
 int runTest(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
 */
+
 void runHydro(void * latticeParams, void * initCondParams, void * hydroParams, const char *rootDirectory, const char *outputDir) {
 	run(latticeParams, initCondParams, hydroParams, rootDirectory, outputDir);
 }
 
 int main(int argc, char **argv) {
 
-	struct CommandLineArguments cli;
+	class cli_arguments cli;
 	struct LatticeParameters latticeParams;
 	struct InitialConditionParameters initCondParams;
 	struct HydroParameters hydroParams;
 
-	loadCommandLineArguments(argc, argv, &cli, version, address);
-
-	char *rootDirectory = NULL;
-	size_t size;
-	rootDirectory = getcwd(rootDirectory,size);
-
-	// Print argument values
-	printf("configDirectory = %s\n", cli.configDirectory);
-	printf("outputDirectory = %s\n", cli.outputDirectory);
-	if (cli.runHydro)
-		printf("runHydro = True\n");
-	else
-		printf("runHydro = False\n");
-	if (cli.runTest)
-		printf("runTest = True\n");
-	else
-		printf("runTest = False\n");
+	cli::load_cli_args(argc, argv);
+	cli::print_arg_vals();
 
 	//=========================================
 	// Set parameters from configuration files
 	//=========================================
-	config_t latticeConfig, initCondConfig, hydroConfig;
+	libconfig::Config lattice_config, ic_config, hydro_config;
 
+	// TODO: Switch to C++ API
 	// Set lattice parameters from configuration file
-	config_init(&latticeConfig);
-	loadLatticeParameters(&latticeConfig, cli.configDirectory, &latticeParams);
-	config_destroy(&latticeConfig);
+	load_lattice_params(lattice_config, cli::cli_args.config_dir, lattice_params);
 	// Set initial condition parameters from configuration file
-	config_init(&initCondConfig);
-	loadInitialConditionParameters(&initCondConfig, cli.configDirectory, &initCondParams);
-	config_destroy(&initCondConfig);
+	load_ic_params(ic_config, cli::cli_args.config_dir, ic_params);
 	// Set hydrodynamic parameters from configuration file
-	config_init(&hydroConfig);
-	loadHydroParameters(&hydroConfig, cli.configDirectory, &hydroParams);
-	config_destroy (&hydroConfig);
+	load_hydro_params(hydro_config, cli::cli_args.config_dir, hydro_params);
 
 	//=========================================
 	// Run tests

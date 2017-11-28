@@ -7,16 +7,14 @@
 
 #include "edu/osu/rhic/harness/util/Properties.h"
 
-void getIntegerProperty(config_t *cfg, const char* propName, int *propValue, int defaultValue) {
-	  if(config_lookup_int(cfg, propName, propValue))
-	    return;
-	  else
-	    *propValue = defaultValue;
+namespace rhic
+{
+	template<typename T>
+	void get_prop(libconfig::Config &cfg, const char *prop_name, T &prop_val, T default_val) {
+		  if(cfg::lookupValue(std::string(prop_name), prop_val))
+		    return;
+		  else
+		    prop_val = default_val;
+	}
 }
 
-void getDoubleProperty(config_t *cfg, const char* propName, double *propValue, double defaultValue) {
-	  if(config_lookup_float(cfg, propName, propValue))
-	    return;
-	  else
-	    *propValue = defaultValue;
-}

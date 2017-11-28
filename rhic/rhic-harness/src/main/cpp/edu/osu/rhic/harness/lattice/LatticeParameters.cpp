@@ -8,47 +8,41 @@
 #include "edu/osu/rhic/harness/lattice/LatticeParameters.h"
 #include "edu/osu/rhic/harness/util/Properties.h"
 
-int numLatticePointsX;
-int numLatticePointsY;
-int numLatticePointsRapidity;
-int numProperTimePoints;
-
-double latticeSpacingX;
-double latticeSpacingY;
-double latticeSpacingRapidity;
-double latticeSpacingProperTime;
-
-void loadLatticeParameters(config_t *cfg, const char* configDirectory, void * params) {
-	// Read the file
-	char fname[255];
-	sprintf(fname, "%s/%s", configDirectory, "lattice.properties");
-	if (!config_read_file(cfg, fname)) {
-		fprintf(stderr, "No configuration file  %s found for lattice parameters - %s.\n", fname, config_error_text(cfg));
-		fprintf(stderr, "Using default lattice configuration parameters.\n");
+namespace rhic
+{
+	void lattice_parameters::lattice_parameters(libconfig::Config &cfg, std::string config_dir)
+	{
+		load_params(cfg, config_dir);
 	}
 
-	getIntegerProperty(cfg, "numLatticePointsX", &numLatticePointsX, 128);
-//	fprintf(stderr,"numLatticePointsX = %d\n",numLatticePointsX);
-	getIntegerProperty(cfg, "numLatticePointsY", &numLatticePointsY, 128);
-	getIntegerProperty(cfg, "numLatticePointsRapidity", &numLatticePointsRapidity, 64);
-	getIntegerProperty(cfg, "numProperTimePoints", &numProperTimePoints, 10);
+	void lattice_parameters::load_params(libconfig::Config &cfg, std::string config_dir)
+	{
+		// Read the file
+		std::string fname = config_dir + std::string("/lattice.properties");
 
-	getDoubleProperty(cfg, "latticeSpacingX", &latticeSpacingX, 0.08);
-	getDoubleProperty(cfg, "latticeSpacingY", &latticeSpacingY, 0.08);
-	getDoubleProperty(cfg, "latticeSpacingRapidity", &latticeSpacingRapidity, 0.3);
-	getDoubleProperty(cfg, "latticeSpacingProperTime", &latticeSpacingProperTime, 0.01);
+		try
+		{
+			cfg.readFile(fname.c_str());
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << "No configuration file " << fname << " found for lattice parameters - "
+			  << config_error_text(cfg) << "\nUsing default lattice configuration parameters.\n";
+		}
 
-	struct LatticeParameters * lattice = (struct LatticeParameters *) params;
-	lattice->numLatticePointsX = numLatticePointsX;
-	lattice->numLatticePointsY = numLatticePointsY;
-	lattice->numLatticePointsRapidity = numLatticePointsRapidity;
-	lattice->numComputationalLatticePointsX = numLatticePointsX+N_GHOST_CELLS;
-	lattice->numComputationalLatticePointsY = numLatticePointsY+N_GHOST_CELLS;
-	lattice->numComputationalLatticePointsRapidity = numLatticePointsRapidity+N_GHOST_CELLS;
-	lattice->numProperTimePoints = numProperTimePoints;
-	lattice->latticeSpacingX = latticeSpacingX;
-	lattice->latticeSpacingY = latticeSpacingY;
-	lattice->latticeSpacingRapidity = latticeSpacingRapidity;
-	lattice->latticeSpacingProperTime = latticeSpacingProperTime;
+		get_prop(cfg, "numLatticePointsX", &numLatticePointsX, 128);
+		get_prop(cfg, "numLatticePointsY", &numLatticePointsY, 128);
+		get_prop(cfg, "numLatticePointsRapidity", &numLatticePointsRapidity, 64);
+		get_prop(cfg, "numProperTimePoints", &numProperTimePoints, 10);
+	
+		get_prop(cfg, "latticeSpacingX", &latticeSpacingX, 0.08);
+		get_prop(cfg, "latticeSpacingY", &latticeSpacingY, 0.08);
+		get_prop(cfg, "latticeSpacingRapidity", &latticeSpacingRapidity, 0.3);
+		get_prop(cfg, "latticeSpacingProperTime", &latticeSpacingProperTime, 0.01);
+
+		numComputationalLatticePointsX = numLatticePointsX+N_GHOST_CELLS;
+		numComputationalLatticePointsY = numLatticePointsY+N_GHOST_CELLS;
+		numComputationalLatticePointsRapidity = numLatticePointsRapidity+N_GHOST_CELLS;
+	}
 }
 

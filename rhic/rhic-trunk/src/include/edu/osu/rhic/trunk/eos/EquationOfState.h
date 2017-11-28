@@ -16,12 +16,23 @@
 //#define EOS_FACTOR 15.6269 // Nc=3, Nf=3
 #define EOS_FACTOR 13.8997 // Nc=3, Nf=2.5
 
-PRECISION equilibriumPressure(PRECISION e);
+namespace rhic
+{
+	class eos
+	{
+		public:
+			template<typename T>
+			T equilibriumPressure(T e);
 
-PRECISION speedOfSoundSquared(PRECISION e);
+			template<typename T>
+			T speedOfSoundSquared(T e);
 
-PRECISION effectiveTemperature(PRECISION e);
+			template<typename T>
+			T effectiveTemperature(T e);
 
-PRECISION equilibriumEnergyDensity(PRECISION T);
+			template<typename T>
+			T equilibriumEnergyDensity(T T);
+	};
+}
 
 #endif /* EQUATIONOFSTATE_H_ */
