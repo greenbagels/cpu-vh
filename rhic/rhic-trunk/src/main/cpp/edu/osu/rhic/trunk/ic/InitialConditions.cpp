@@ -79,7 +79,8 @@ void setPimunuNavierStokesInitialCondition(void * latticeParams, void * initCond
 //				double T = pow(e[s]/e0, 0.25);
 				PRECISION T = effectiveTemperature(e[s]);
 				if (T == 0) T = 1.e-3;
-				PRECISION pinn = -2/(3*t*t*t)*etabar*(e[s]+p[s])/T;
+				//PRECISION pinn = -2/(3*t*t*t)*etabar*(e[s]+p[s])/T;
+				PRECISION pinn = -4.0/(3.0*t*t*t)*etabar*(e[s] + p[s]) / T;
 #ifdef PIMUNU
 				q->pitt[s] = 0;
 				q->pitx[s] = 0;

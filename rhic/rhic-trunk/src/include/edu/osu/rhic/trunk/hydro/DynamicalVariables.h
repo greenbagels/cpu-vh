@@ -10,7 +10,7 @@
 
 #define NUMBER_CONSERVATION_LAWS 4
 
-//#define PIMUNU 
+#define PIMUNU 
 //#define PI
 
 /*********************************************************/
@@ -41,7 +41,7 @@
 #define NUMBER_CONSERVED_VARIABLES (NUMBER_CONSERVATION_LAWS+NUMBER_DISSIPATIVE_CURRENTS)
 /*********************************************************/
 
-#define PRECISION float
+#define PRECISION double
 
 typedef struct 
 {
