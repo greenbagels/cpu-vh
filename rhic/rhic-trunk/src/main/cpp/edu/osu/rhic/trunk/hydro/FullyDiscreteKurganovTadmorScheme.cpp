@@ -566,7 +566,7 @@ int ncx, int ncy, int ncz
 		//		PRECISION pipi = pitt*pitt-2*(pitx*pitx+pity*pity-pixy*pixy+t2*(pitn*pitn-pixn*pixn-piyn*piyn))+pixx*pixx+piyy*piyy+pinn*pinn*t2*t2;
 				PRECISION pipi = pitt*pitt-2*pitx*pitx-2*pity*pity+pixx*pixx+2*pixy*pixy+piyy*piyy-2*pitn*pitn*t2+2*pixn*pixn*t2+2*piyn*piyn*t2+pinn*pinn*t2*t2;
 				if(isnan(pipi)==1) printf("found pipi Nan\n");
-				PRECISION spipi = sqrt(fabs(pipi+3*Pi*Pi));
+				PRECISION spipi = sqrt(fabs(pipi+3*Pi*Pi)); //change this to sqrt(fabs(pipi)) to remove bulk pressure regulation of shear stress 
 				if(isnan(spipi)==1) printf("found spipi Nan\n");
 				PRECISION pimumu = pitt - pixx - piyy - pinn*t*t;
 				PRECISION piu0 = -(pitn*t2*un) + pitt*ut - pitx*ux - pity*uy;
@@ -590,10 +590,9 @@ int ncx, int ncy, int ncz
 				if(isnan(rho)==1) printf("found rho Nan\n");
 				PRECISION fac = tanh(rho)/rho;
 				if(fabs(rho)<1.e-7) fac = 1;
-		//		PRECISION fac = 1;
-				if(isnan(fac)==1) printf("found Nan\n");
-		//		fac = 1;
+				if(isnan(fac)==1) printf("found fac Nan\n");
 
+				//regulate the shear stress 
 				currrentVars->pitt[s] *= fac;
 				currrentVars->pitx[s] *= fac;
 				currrentVars->pity[s] *= fac;
@@ -604,6 +603,18 @@ int ncx, int ncy, int ncz
 				currrentVars->piyy[s] *= fac;
 				currrentVars->piyn[s] *= fac;
 				currrentVars->pinn[s] *= fac;
+				
+				/*
+				//regulate the bulk pressure according to it's inverse reynolds #
+				PRECISION rhoBulk = abs(Pi) / sqrtf(e[s]*e[s]+3*p[s]*p[s]);
+				if(isnan(rhoBulk) == 1) printf("found rhoBulk Nan\n");
+                                PRECISION facBulk = tanh(rhoBulk) / rhoBulk;
+                                if(fabs(rhoBulk) < 1.e-7) facBulk = 1.0;
+                                if(isnan(facBulk) == 1) printf("found facBulk Nan\n");
+				
+				//regulate bulk pressure 
+				currentVars->Pi[s] *= facBulk;
+				*/
 			}
 		}
 	}
