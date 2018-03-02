@@ -143,8 +143,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
   //open the freezeout surface file
   ofstream freezeoutSurfaceFile;
-  if (FOFORMAT == 0) freezeoutSurfaceFile.open("output/freezeoutSurface.dat");
-  else freezeoutSurfaceFile.open("output/freezeoutSurface.dat", ios::binary);
+  if (FOFORMAT == 0) freezeoutSurfaceFile.open("output/surface.dat");
+  else freezeoutSurfaceFile.open("output/surface.dat", ios::binary);
   /************************************************************************************	\
   * Fluid dynamic initialization
   /************************************************************************************/
@@ -186,6 +186,12 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
       //}
     }
 
+    //************************************************************************************\
+    // Freeze-out finder (Derek)
+    // the freezeout surface file is written in the format which can
+    // be read by iS3D : https://github.com/derekeverett/iS3D
+    //************************************************************************************/
+
     //append the energy density and all hydro variables to storage arrays
     int nFO = n % FOFREQ;
 
@@ -220,8 +226,6 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
               //write the values of energy density to all corners of the hyperCube
               if (dim == 4) writeEnergyDensityToHypercube4D(hyperCube4D, energy_density_evoution, it, ix, iy, iz);
               else if (dim == 3) writeEnergyDensityToHypercube3D(hyperCube3D, energy_density_evoution, it, ix, iy);
-              //the freezeout surface file is written in the same format that is
-              //written by MUSIC hydro code (see readFreezeOutSurface() in freeze.cpp)
 
               //use cornelius to find the centroid and normal vector of each hyperCube
               if (dim == 4) cor.find_surface_4d(hyperCube4D);
@@ -251,7 +255,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                   freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << " ";
                   if (dim == 4) freezeoutSurfaceFile << cor.get_centroid_elem(i,3) + cell_z << " ";
                   else freezeoutSurfaceFile << cell_z << " ";
-                  //then the surface normal element; note jacobian factors of tau for milne coordinates
+                  //then the contravariant surface normal element; note jacobian factors of tau for milne coordinates
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,0) << " ";
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,1) << " ";
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,2) << " ";
@@ -262,7 +266,7 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
 
                   if (dim == 4) // for 3+1D
                   {
-                    //first write the flow velocity
+                    //first write the contravariant flow velocity
                     for (int ivar = 0; ivar < dim; ivar++)
                     {
                       temp = interpolateVariable4D(hydrodynamic_evoution, ivar, it, ix, iy, iz, tau_frac, x_frac, y_frac, z_frac);
@@ -273,11 +277,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     freezeoutSurfaceFile << temp << " "; //note : iSpectra reads in file in fm^x units e.g. energy density should be written in fm^-4
                     //the temperature !this needs to be checked
                     freezeoutSurfaceFile << effectiveTemperature(temp) << " ";
-                    //the baryon chemical potential, writing zero for now
-                    freezeoutSurfaceFile << 0.0 << " ";
-                    //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
-                    double e_plus_P_over_T = (temp + equilibriumPressure(temp)) / effectiveTemperature(temp);
-                    freezeoutSurfaceFile << e_plus_P_over_T << " ";
+                    //the thermal pressure
+                    freezeoutSurfaceFile << equilibriumPressure(temp) << " ";
                     //write ten components of pi_(mu,nu) shear viscous tensor
                     for (int ivar = 5; ivar < 15; ivar++)
                     {
@@ -302,11 +303,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                     freezeoutSurfaceFile << temp << " "; //note units of fm^-4 appropriate for iSpectra reading
                     //the temperature !this needs to be checked
                     freezeoutSurfaceFile << effectiveTemperature(temp) << " ";
-                    //the baryon chemical potential, writing zero for now
-                    freezeoutSurfaceFile << 0.0 << " ";
-                    //  (e + P) / T , the entropy density for zero chem. potentials !check this, note we could be a divide by zero problem if T=0!
-                    double e_plus_P_over_T = (temp + equilibriumPressure(temp)) / effectiveTemperature(temp);
-                    freezeoutSurfaceFile << e_plus_P_over_T << " ";
+                    //the thermal pressure
+                    freezeoutSurfaceFile << equilibriumPressure(temp) << " ";
                     //write ten components of pi_(mu,nu) shear viscous tensor
                     for (int ivar = 5; ivar < 15; ivar++)
                     {
