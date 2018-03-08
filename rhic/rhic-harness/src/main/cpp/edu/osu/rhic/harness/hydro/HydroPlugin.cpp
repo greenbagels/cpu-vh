@@ -255,7 +255,8 @@ void run(void * latticeParams, void * initCondParams, void * hydroParams, const 
                   freezeoutSurfaceFile << cor.get_centroid_elem(i,2) + cell_y << " ";
                   if (dim == 4) freezeoutSurfaceFile << cor.get_centroid_elem(i,3) + cell_z << " ";
                   else freezeoutSurfaceFile << cell_z << " ";
-                  //then the contravariant surface normal element; note jacobian factors of tau for milne coordinates
+                  //then the (covariant?) surface normal element; check jacobian factors of tau for milne coordinates!
+                  //acording to cornelius user guide, corenelius returns covariant components of normal vector without jacobian factors
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,0) << " ";
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,1) << " ";
                   freezeoutSurfaceFile << t * cor.get_normal_elem(i,2) << " ";
