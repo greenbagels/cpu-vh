@@ -10,7 +10,7 @@
 
 #include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
 
-#define THETA 1.1
+#define THETA 1.9
 
 PRECISION approximateDerivative(PRECISION x, PRECISION y, PRECISION z);
 

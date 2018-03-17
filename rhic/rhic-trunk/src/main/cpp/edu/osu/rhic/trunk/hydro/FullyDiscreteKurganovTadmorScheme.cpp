@@ -527,7 +527,7 @@ int ncx, int ncy, int ncz
 #ifndef IDEAL
 void
 regulateDissipativeCurrents(PRECISION t,
-const CONSERVED_VARIABLES * const __restrict__ currrentVars,
+const CONSERVED_VARIABLES * const __restrict__ currentVars,
 const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u,
 int ncx, int ncy, int ncz
@@ -537,18 +537,18 @@ int ncx, int ncy, int ncz
 			for(int k = 2; k < ncz-2; ++k) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
 
-				PRECISION pitt = currrentVars->pitt[s];
-				PRECISION pitx = currrentVars->pitx[s];
-				PRECISION pity = currrentVars->pity[s];
-				PRECISION pitn = currrentVars->pitn[s];
-				PRECISION pixx = currrentVars->pixx[s];
-				PRECISION pixy = currrentVars->pixy[s];
-				PRECISION pixn = currrentVars->pixn[s];
-				PRECISION piyy = currrentVars->piyy[s];
-				PRECISION piyn = currrentVars->piyn[s];
-				PRECISION pinn = currrentVars->pinn[s];
+				PRECISION pitt = currentVars->pitt[s];
+				PRECISION pitx = currentVars->pitx[s];
+				PRECISION pity = currentVars->pity[s];
+				PRECISION pitn = currentVars->pitn[s];
+				PRECISION pixx = currentVars->pixx[s];
+				PRECISION pixy = currentVars->pixy[s];
+				PRECISION pixn = currentVars->pixn[s];
+				PRECISION piyy = currentVars->piyy[s];
+				PRECISION piyn = currentVars->piyn[s];
+				PRECISION pinn = currentVars->pinn[s];
 #ifdef Pi
-				PRECISION Pi = currrentVars->Pi[s];
+				PRECISION Pi = currentVars->Pi[s];
 #else
 				PRECISION Pi = 0;
 #endif
@@ -594,18 +594,18 @@ int ncx, int ncy, int ncz
 				if(isnan(fac)==1) printf("found fac Nan\n");
 
 				//regulate the shear stress
-				currrentVars->pitt[s] *= fac;
-				currrentVars->pitx[s] *= fac;
-				currrentVars->pity[s] *= fac;
-				currrentVars->pitn[s] *= fac;
-				currrentVars->pixx[s] *= fac;
-				currrentVars->pixy[s] *= fac;
-				currrentVars->pixn[s] *= fac;
-				currrentVars->piyy[s] *= fac;
-				currrentVars->piyn[s] *= fac;
-				currrentVars->pinn[s] *= fac;
+				currentVars->pitt[s] *= fac;
+				currentVars->pitx[s] *= fac;
+				currentVars->pity[s] *= fac;
+				currentVars->pitn[s] *= fac;
+				currentVars->pixx[s] *= fac;
+				currentVars->pixy[s] *= fac;
+				currentVars->pixn[s] *= fac;
+				currentVars->piyy[s] *= fac;
+				currentVars->piyn[s] *= fac;
+				currentVars->pinn[s] *= fac;
 
-				
+
 				//regulate the bulk pressure according to it's inverse reynolds #
 				PRECISION rhoBulk = abs(Pi) / sqrtf(e[s]*e[s]+3*p[s]*p[s]);
 				if(isnan(rhoBulk) == 1) printf("found rhoBulk Nan\n");
