@@ -22,6 +22,8 @@
 
 #include "edu/osu/rhic/core/util/FiniteDifference.h" //temp
 
+//#define REGULATE_BULK //define to regulate bulk pressure according to inv reynolds #, otherwise bulk is not regulated 
+
 /**************************************************************************************************************************************************\
 void setNeighborCells(const PRECISION * const __restrict__ data,
 PRECISION * const __restrict__ I, PRECISION * const __restrict__ J, PRECISION * const __restrict__ K, PRECISION * const __restrict__ Q,
@@ -537,6 +539,7 @@ int ncx, int ncy, int ncz
 			for(int k = 2; k < ncz-2; ++k) {
 				int s = columnMajorLinearIndex(i, j, k, ncx, ncy);
 
+#ifdef PIMUNU
 				PRECISION pitt = currentVars->pitt[s];
 				PRECISION pitx = currentVars->pitx[s];
 				PRECISION pity = currentVars->pity[s];
@@ -547,7 +550,19 @@ int ncx, int ncy, int ncz
 				PRECISION piyy = currentVars->piyy[s];
 				PRECISION piyn = currentVars->piyn[s];
 				PRECISION pinn = currentVars->pinn[s];
-#ifdef Pi
+#else
+				PRECISION pitt = 0.0;
+				PRECISION pitx = 0.0;
+				PRECISION pity = 0.0;
+				PRECISION pitn = 0.0;
+				PRECISION pixx = 0.0;
+				PRECISION pixy = 0.0;
+				PRECISION pixn = 0.0;
+				PRECISION piyy = 0.0;
+				PRECISION piyn = 0.0;
+				PRECISION pinn = 0.0;
+#endif
+#ifdef PI
 				PRECISION Pi = currentVars->Pi[s];
 #else
 				PRECISION Pi = 0;
@@ -594,6 +609,7 @@ int ncx, int ncy, int ncz
 				if(isnan(fac)==1) printf("found fac Nan\n");
 
 				//regulate the shear stress
+				#ifdef PIMUNU
 				currentVars->pitt[s] *= fac;
 				currentVars->pitx[s] *= fac;
 				currentVars->pity[s] *= fac;
@@ -604,9 +620,10 @@ int ncx, int ncy, int ncz
 				currentVars->piyy[s] *= fac;
 				currentVars->piyn[s] *= fac;
 				currentVars->pinn[s] *= fac;
-
+				#endif
 
 				//regulate the bulk pressure according to it's inverse reynolds #
+				#ifdef REGULATE_BULK
 				PRECISION rhoBulk = abs(Pi) / sqrtf(e[s]*e[s]+3*p[s]*p[s]);
 				if(isnan(rhoBulk) == 1) printf("found rhoBulk Nan\n");
                                 PRECISION facBulk = tanh(rhoBulk) / rhoBulk;
@@ -614,7 +631,11 @@ int ncx, int ncy, int ncz
                                 if(isnan(facBulk) == 1) printf("found facBulk Nan\n");
 
 				//regulate bulk pressure
+				#ifdef PI
 				currentVars->Pi[s] *= facBulk;
+				#endif
+
+				#endif
 
 			}
 		}
