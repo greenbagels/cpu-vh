@@ -741,7 +741,7 @@ void setGlauberInitialCondition(void * latticeParams, void * initCondParams) {
 	double dz = lattice->latticeSpacingRapidity;
 
 	double e0 = initCond->initialEnergyDensity;
-	double T0 = 3.05;
+	double T0 = 2.05;
 //	e0 *= pow(T0,4);
 	e0 = (double) equilibriumEnergyDensity(T0);
 

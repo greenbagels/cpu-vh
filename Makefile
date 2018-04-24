@@ -5,10 +5,11 @@ DIR_BUILD      = $(DIR_MAIN)build/
 DIR_OBJ        = $(DIR_BUILD)rhic
 
 DEBUG =
-OPTIMIZATION = -O5  
+OPTIMIZATION = -O5
 FLOWTRACE =
-OPTIONS =
-LINK_OPTIONS = -link -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/everett.165/googletest-master/googletest/mybuild/ -lgtest
+OPTIONS = -Xcompiler -fopenmp
+LINK_OPTIONS = -link -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/everett.165/googletest-master/googletest/mybuild/ -lgtest -lgomp
+#LINK_OPTIONS = -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/everett.165/googletest-master/googletest/mybuild/ -lgtest
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS)
 COMPILER = nvcc
 LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest
@@ -16,7 +17,7 @@ INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -
 
 CPP := $(shell find $(DIR_SRC) -name '*.cpp')
 CPP_OBJ  = $(CPP:$(DIR_SRC)%.cpp=$(DIR_OBJ)%.o)
-OBJ = $(CPP_OBJ) 
+OBJ = $(CPP_OBJ)
 
 EXE =\
 cpu-vh
