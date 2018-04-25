@@ -9,7 +9,7 @@
 #include "edu/osu/rhic/trunk/hydro/DynamicalVariables.h"
 #include "edu/osu/rhic/harness/lattice/LatticeParameters.h"
 #include "edu/osu/rhic/trunk/hydro/EnergyMomentumTensor.h"
-#include "edu/osu/rhic/trunk/hydro/FullyDiscreteKurganovTadmorScheme.h" // for ghost cells 
+#include "edu/osu/rhic/trunk/hydro/FullyDiscreteKurganovTadmorScheme.h" // for ghost cells
 
 CONSERVED_VARIABLES *q,*Q,*qS;
 
@@ -26,7 +26,7 @@ void allocateHostMemory(int len) {
 
 	//=======================================================
 	// Primary variables
-	//=======================================================	
+	//=======================================================
 	e = (PRECISION *)calloc(len, bytes);
 	p = (PRECISION *)calloc(len,bytes);
 	// fluid velocity at current time step
@@ -127,6 +127,7 @@ void setConservedVariables(double t, void * latticeParams) {
 	int ncx = lattice->numComputationalLatticePointsX;
 	int ncy = lattice->numComputationalLatticePointsY;
 
+	#pragma omp parallel for collapse(3)
 	for (int k = N_GHOST_CELLS_M; k < nz+N_GHOST_CELLS_M; ++k) {
 		for (int j = N_GHOST_CELLS_M; j < ny+N_GHOST_CELLS_M; ++j) {
 			for (int i = N_GHOST_CELLS_M; i < nx+N_GHOST_CELLS_M; ++i) {
@@ -153,7 +154,7 @@ void setConservedVariables(double t, void * latticeParams) {
 #ifdef PI
 				Pi_s = q->Pi[s];
 #endif
-			
+
 				q->ttt[s] = Ttt(e_s, p_s+Pi_s, ut_s, pitt_s);
 				q->ttx[s] = Ttx(e_s, p_s+Pi_s, ut_s, ux_s, pitx_s);
 				q->tty[s] = Tty(e_s, p_s+Pi_s, ut_s, uy_s, pity_s);
@@ -163,8 +164,8 @@ void setConservedVariables(double t, void * latticeParams) {
 	}
 }
 
-void setGhostCells(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
+void setGhostCells(CONSERVED_VARIABLES * const __restrict__ q,
+PRECISION * const __restrict__ e, PRECISION * const __restrict__ p,
 FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 ) {
 	setGhostCellsKernelI(q,e,p,u,latticeParams);
@@ -172,8 +173,8 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	setGhostCellsKernelK(q,e,p,u,latticeParams);
 }
 
-void setGhostCellVars(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
+void setGhostCellVars(CONSERVED_VARIABLES * const __restrict__ q,
+PRECISION * const __restrict__ e, PRECISION * const __restrict__ p,
 FLUID_VELOCITY * const __restrict__ u,
 int s, int sBC) {
 	e[s] = e[sBC];
@@ -181,7 +182,7 @@ int s, int sBC) {
 	u->ut[s] = u->ut[sBC];
 	u->ux[s] = u->ux[sBC];
 	u->uy[s] = u->uy[sBC];
-	u->un[s] = u->un[sBC];	
+	u->un[s] = u->un[sBC];
 	q->ttt[s] = q->ttt[sBC];
 	q->ttx[s] = q->ttx[sBC];
 	q->tty[s] = q->tty[sBC];
@@ -197,16 +198,16 @@ int s, int sBC) {
 	q->pixn[s] = q->pixn[sBC];
 	q->piyy[s] = q->piyy[sBC];
 	q->piyn[s] = q->piyn[sBC];
-	q->pinn[s] = q->pinn[sBC];	
+	q->pinn[s] = q->pinn[sBC];
 #endif
 	// set \Pi ghost cells if evolved
 #ifdef PI
-	q->Pi[s] = q->Pi[sBC];	
+	q->Pi[s] = q->Pi[sBC];
 #endif
 }
 
-void setGhostCellsKernelI(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
+void setGhostCellsKernelI(CONSERVED_VARIABLES * const __restrict__ q,
+PRECISION * const __restrict__ e, PRECISION * const __restrict__ p,
 FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 ) {
 	struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
@@ -218,11 +219,12 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int iBC,s,sBC;
+	#pragma omp parallel for
 	for(int j = 2; j < ncy; ++j) {
 		for(int k = 2; k < ncz; ++k) {
 			iBC = 2;
 			for (int i = 0; i <= 1; ++i) {
-				s = columnMajorLinearIndex(i, j, k, ncx, ncy);	
+				s = columnMajorLinearIndex(i, j, k, ncx, ncy);
 				sBC = columnMajorLinearIndex(iBC, j, k, ncx, ncy);
 				setGhostCellVars(q,e,p,u,s,sBC);
 			}
@@ -236,8 +238,8 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	}
 }
 
-void setGhostCellsKernelJ(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
+void setGhostCellsKernelJ(CONSERVED_VARIABLES * const __restrict__ q,
+PRECISION * const __restrict__ e, PRECISION * const __restrict__ p,
 FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 ) {
 	struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
@@ -249,26 +251,27 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int jBC,s,sBC;
+	#pragma omp parallel for
 	for(int i = 2; i < ncx; ++i) {
 		for(int k = 2; k < ncz; ++k) {
 			jBC = 2;
 			for (int j = 0; j <= 1; ++j) {
 				s = columnMajorLinearIndex(i, j, k, ncx, ncy);
-				sBC = columnMajorLinearIndex(i, jBC, k, ncx, ncy);	
+				sBC = columnMajorLinearIndex(i, jBC, k, ncx, ncy);
 				setGhostCellVars(q,e,p,u,s,sBC);
 			}
 			jBC = ny + 1;
 			for (int j = ny + 2; j <= ny + 3; ++j) {
 				s = columnMajorLinearIndex(i, j, k, ncx, ncy);
 				sBC = columnMajorLinearIndex(i, jBC, k, ncx, ncy);
-				setGhostCellVars(q,e,p,u,s,sBC);		
+				setGhostCellVars(q,e,p,u,s,sBC);
 			}
 		}
 	}
 }
 
-void setGhostCellsKernelK(CONSERVED_VARIABLES * const __restrict__ q, 
-PRECISION * const __restrict__ e, PRECISION * const __restrict__ p, 
+void setGhostCellsKernelK(CONSERVED_VARIABLES * const __restrict__ q,
+PRECISION * const __restrict__ e, PRECISION * const __restrict__ p,
 FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 ) {
 	struct LatticeParameters * lattice = (struct LatticeParameters *) latticeParams;
@@ -279,6 +282,7 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncy = lattice->numComputationalLatticePointsY;
 
 	int kBC,s,sBC;
+	#pragma omp parallel for
 	for(int i = 2; i < ncx; ++i) {
 		for(int j = 2; j < ncy; ++j) {
 			kBC = 2;
