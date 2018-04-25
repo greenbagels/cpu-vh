@@ -155,6 +155,7 @@ const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz, PRECISION etabar
 ) {
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
@@ -219,6 +220,7 @@ const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx
 ) {
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
@@ -308,6 +310,7 @@ const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy
 ) {
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
@@ -397,6 +400,7 @@ const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 ) {
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
@@ -487,6 +491,7 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 void convexCombinationEulerStepKernel(const CONSERVED_VARIABLES * const __restrict__ q, CONSERVED_VARIABLES * const __restrict__ Q,
 int ncx, int ncy, int ncz
 ) {
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
@@ -540,6 +545,7 @@ const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u,
 int ncx, int ncy, int ncz
 ) {
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {

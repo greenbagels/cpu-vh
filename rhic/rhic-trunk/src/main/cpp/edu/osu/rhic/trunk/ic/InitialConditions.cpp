@@ -18,6 +18,8 @@
 #include "edu/osu/rhic/harness/hydro/HydroParameters.h"
 #include "edu/osu/rhic/trunk/eos/EquationOfState.h"
 
+#include <omp.h>
+
 #define THETA_FUNCTION(X) ((double)X < (double)0 ? (double)0 : (double)1)
 
 
@@ -486,6 +488,7 @@ void setFluidVelocityInitialCondition(void * latticeParams, void * hydroParams) 
 
 	double t0 = hydro->initialProperTimePoint;
 
+  #pragma omp parallel for collapse(3)
 	for(int i = 2; i < nx+2; ++i) {
 		for(int j = 2; j < ny+2; ++j) {
 			for(int k = 2; k < nz+2; ++k) {
@@ -523,6 +526,7 @@ void setPimunuNavierStokesInitialCondition(void * latticeParams, void * initCond
 
 	PRECISION e0 = initCond->initialEnergyDensity;
 
+  #pragma omp parallel for collapse(3)
 	for(int i = 2; i < nx+2; ++i) {
 		for(int j = 2; j < ny+2; ++j) {
 			for(int k = 2; k < nz+2; ++k) {
@@ -588,6 +592,8 @@ void setPimunuInitialCondition(void * latticeParams, void * initCondParams, void
 		int nx = lattice->numLatticePointsX;
 		int ny = lattice->numLatticePointsY;
 		int nz = lattice->numLatticePointsRapidity;
+
+    #pragma omp parallel for collapse(3)
 		for(int i = 2; i < nx+2; ++i) {
 			for(int j = 2; j < ny+2; ++j) {
 				for(int k = 2; k < nz+2; ++k) {
@@ -628,6 +634,8 @@ void setConstantEnergyDensityInitialCondition(void * latticeParams, void * initC
 	int nx = lattice->numLatticePointsX;
 	int ny = lattice->numLatticePointsY;
 	int nz = lattice->numLatticePointsRapidity;
+
+  #pragma omp parallel for collapse(3)
 	for(int i = 2; i < nx+2; ++i) {
 		for(int j = 2; j < ny+2; ++j) {
 			for(int k = 2; k < nz+2; ++k) {
@@ -717,6 +725,7 @@ void longitudinalEnergyDensityDistribution(double * const __restrict__ eL, void 
 	double etaFlat = initCond->rapidityMean;
 	double etaVariance = initCond->rapidityVariance;
 
+  #pragma omp parallel for
 	for(int k = 0; k < nz; ++k) {
 		double eta = (k - (nz-1)/2)*dz;
 		double etaScaled = fabs(eta) - etaFlat/2;
@@ -749,10 +758,11 @@ void setGlauberInitialCondition(void * latticeParams, void * initCondParams) {
 	energyDensityTransverseProfileAA(eT, nx, ny, dx, dy, initCondParams);
 	longitudinalEnergyDensityDistribution(eL, latticeParams, initCondParams);
 
+  #pragma omp parallel for collapse(3)
 	for(int i = 2; i < nx+2; ++i) {
 		for(int j = 2; j < ny+2; ++j) {
-			double energyDensityTransverse = e0 * eT[i-2+(j-2)*nx];
 			for(int k = 2; k < nz+2; ++k) {
+        double energyDensityTransverse = e0 * eT[i-2+(j-2)*nx];
 				int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
 				double energyDensityLongitudinal = eL[k-2];
 				double ed = (energyDensityTransverse * energyDensityLongitudinal) + 1.e-3;
@@ -788,10 +798,11 @@ void setMCGlauberInitialCondition(void * latticeParams, void * initCondParams) {
 	monteCarloGlauberEnergyDensityTransverseProfile(eT, nx, ny, dx, dy, initCondParams);
 	longitudinalEnergyDensityDistribution(eL, latticeParams, initCondParams);
 
+  #pragma omp parallel for collapse(3)
 	for(int i = 2; i < nx+2; ++i) {
 		for(int j = 2; j < ny+2; ++j) {
-			double energyDensityTransverse = e0 * eT[i-2 + nx*(j-2)];
 			for(int k = 2; k < nz+2; ++k) {
+        double energyDensityTransverse = e0 * eT[i-2 + nx*(j-2)];
 				int s = columnMajorLinearIndex(i, j, k, nx+4, ny+4);
 				double energyDensityLongitudinal = eL[k-2];
 				double ed = (energyDensityTransverse * energyDensityLongitudinal) + 1.e-3;

@@ -11,6 +11,7 @@
 
 #include "edu/osu/rhic/harness/hydro/HydroParameters.h"
 
+/*
 TEST(loadHydroParameters, HyrdoParametersFromConfFile) {
 	struct HydroParameters params;
 	config_t config;
@@ -36,3 +37,4 @@ TEST(loadHydroParameters, DefaultHyrdoParameters) {
 	EXPECT_EQ(0.1, params.initialProperTimePoint);
 	EXPECT_EQ(0.0795775, params.shearViscosityToEntropyDensity);
 }
+*/

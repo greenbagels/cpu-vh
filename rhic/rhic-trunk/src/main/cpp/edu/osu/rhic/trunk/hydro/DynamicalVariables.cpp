@@ -11,6 +11,8 @@
 #include "edu/osu/rhic/trunk/hydro/EnergyMomentumTensor.h"
 #include "edu/osu/rhic/trunk/hydro/FullyDiscreteKurganovTadmorScheme.h" // for ghost cells
 
+#include <omp.h>
+
 CONSERVED_VARIABLES *q,*Q,*qS;
 
 FLUID_VELOCITY *u,*up,*uS;
@@ -127,6 +129,7 @@ void setConservedVariables(double t, void * latticeParams) {
 	int ncx = lattice->numComputationalLatticePointsX;
 	int ncy = lattice->numComputationalLatticePointsY;
 
+	//#pragma omp parallel for simd collapse(3)
 	#pragma omp parallel for collapse(3)
 	for (int k = N_GHOST_CELLS_M; k < nz+N_GHOST_CELLS_M; ++k) {
 		for (int j = N_GHOST_CELLS_M; j < ny+N_GHOST_CELLS_M; ++j) {
@@ -219,7 +222,8 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int iBC,s,sBC;
-	#pragma omp parallel for
+	//#pragma omp parallel for simd collapse(2)
+	#pragma omp parallel for collapse(2)
 	for(int j = 2; j < ncy; ++j) {
 		for(int k = 2; k < ncz; ++k) {
 			iBC = 2;
@@ -251,7 +255,8 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int jBC,s,sBC;
-	#pragma omp parallel for
+	//#pragma omp parallel for simd collapse(2)
+	#pragma omp parallel for collapse(2)
 	for(int i = 2; i < ncx; ++i) {
 		for(int k = 2; k < ncz; ++k) {
 			jBC = 2;
@@ -282,7 +287,8 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncy = lattice->numComputationalLatticePointsY;
 
 	int kBC,s,sBC;
-	#pragma omp parallel for
+	//#pragma omp parallel for simd collapse(2)
+	#pragma omp parallel for collapse(2)
 	for(int i = 2; i < ncx; ++i) {
 		for(int j = 2; j < ncy; ++j) {
 			kBC = 2;

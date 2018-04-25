@@ -11,6 +11,7 @@
 
 #include "edu/osu/rhic/harness/ic/InitialConditionParameters.h"
 
+/*
 TEST(loadInitialConditionParameters, InitialConditionParametersFromConfFile) {
 	struct InitialConditionParameters params;
 	config_t config;
@@ -48,3 +49,4 @@ TEST(loadInitialConditionParameters, DefaultInitialConditionParameters) {
 	EXPECT_EQ(0.5, params.rapidityVariance);
 	EXPECT_EQ(0.5, params.rapidityMean);
 }
+*/

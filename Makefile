@@ -5,14 +5,14 @@ DIR_BUILD      = $(DIR_MAIN)build/
 DIR_OBJ        = $(DIR_BUILD)rhic
 
 DEBUG =
-OPTIMIZATION = -O5
+OPTIMIZATION = -O3
 FLOWTRACE =
-OPTIONS = -Xcompiler -fopenmp
-LINK_OPTIONS = -link -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/everett.165/googletest-master/googletest/mybuild/ -lgtest -lgomp
+OPTIONS = -fopenmp #-static-libstdc++
+LINK_OPTIONS = -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/everett.165/googletest-master/googletest/mybuild/ -lgtest 
 #LINK_OPTIONS = -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/everett.165/googletest-master/googletest/mybuild/ -lgtest
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS)
-COMPILER = nvcc
-LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest
+COMPILER = g++
+LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest -lgomp
 INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -I rhic/rhic-trunk/src/include -I rhic/rhic-harness/src/include -I /home/everett.165/libconfig-1.5/lib/ -I /home/everett.165/googletest-master/googletest/include/ -I freezeout
 
 CPP := $(shell find $(DIR_SRC) -name '*.cpp')
