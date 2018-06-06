@@ -1,6 +1,6 @@
 DIR_MAIN       = ./
-DIR_SRC        = $(DIR_MAIN)rhic
-DIR_H          = $(DIR_MAIN)include/
+DIR_SRC        = $(DIR_MAIN)rhic/src
+DIR_H          = $(DIR_MAIN)rhic/include
 DIR_BUILD      = $(DIR_MAIN)build/
 DIR_OBJ        = $(DIR_BUILD)rhic
 
@@ -13,7 +13,7 @@ LINK_OPTIONS = -L/home/everett.165/libconfig-1.5/lib/.libs -lconfig -L/home/ever
 CFLAGS = $(DEBUG) $(OPTIMIZATION) $(FLOWTRACE) $(OPTIONS)
 COMPILER = g++
 LIBS = -lm -lgsl -lgslcblas -lconfig -lgtest -lgomp
-INCLUDES = -I rhic/rhic-core/src/include -I rhic/rhic-harness/src/main/include -I rhic/rhic-trunk/src/include -I rhic/rhic-harness/src/include -I /home/everett.165/libconfig-1.5/lib/ -I /home/everett.165/googletest-master/googletest/include/ -I freezeout
+INCLUDES = -I rhic/include -I /home/everett.165/libconfig-1.5/lib/ -I /home/everett.165/googletest-master/googletest/include/ -I freezeout
 
 CPP := $(shell find $(DIR_SRC) -name '*.cpp')
 CPP_OBJ  = $(CPP:$(DIR_SRC)%.cpp=$(DIR_OBJ)%.o)
@@ -27,7 +27,7 @@ $(EXE): $(OBJ)
 	$(COMPILER) $(LINK_OPTIONS) -o $@ $^ $(LIBS) $(INCLUDES)
 
 $(DIR_OBJ)%.o: $(DIR_SRC)%.cpp
-	@[ -d $(DIR_OBJ) ] || find rhic/rhic-core rhic/rhic-harness rhic/rhic-trunk -type d -exec mkdir -p ./build/{} \;
+	@[ -d $(DIR_OBJ) ] || find rhic -type d -exec mkdir -p ./build/{} \;
 	@echo "Compiling: $< ($(COMPILER))"
 	$(COMPILER) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
