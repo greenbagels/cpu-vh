@@ -129,8 +129,11 @@ void setConservedVariables(double t, void * latticeParams) {
 	int ncx = lattice->numComputationalLatticePointsX;
 	int ncy = lattice->numComputationalLatticePointsY;
 
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for (int k = N_GHOST_CELLS_M; k < nz+N_GHOST_CELLS_M; ++k) {
 		for (int j = N_GHOST_CELLS_M; j < ny+N_GHOST_CELLS_M; ++j) {
 			for (int i = N_GHOST_CELLS_M; i < nx+N_GHOST_CELLS_M; ++i) {
@@ -222,8 +225,11 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int iBC,s,sBC;
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(2)
+	//#else
 	#pragma omp parallel for collapse(2)
+	//#endif
 	for(int j = 2; j < ncy; ++j) {
 		for(int k = 2; k < ncz; ++k) {
 			iBC = 2;
@@ -255,8 +261,11 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncz = lattice->numComputationalLatticePointsRapidity;
 
 	int jBC,s,sBC;
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(2)
+	//#else
 	#pragma omp parallel for collapse(2)
+	//#endif
 	for(int i = 2; i < ncx; ++i) {
 		for(int k = 2; k < ncz; ++k) {
 			jBC = 2;
@@ -287,8 +296,11 @@ FLUID_VELOCITY * const __restrict__ u, void * latticeParams
 	ncy = lattice->numComputationalLatticePointsY;
 
 	int kBC,s,sBC;
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(2)
+	//#else
 	#pragma omp parallel for collapse(2)
+	//#endif
 	for(int i = 2; i < ncx; ++i) {
 		for(int j = 2; j < ncy; ++j) {
 			kBC = 2;

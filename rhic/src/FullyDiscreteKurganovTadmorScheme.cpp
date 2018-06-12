@@ -23,6 +23,7 @@
 #include "../include/FiniteDifference.h" //temp
 
 #include <omp.h>
+
 //#define REGULATE_BULK //define to regulate bulk pressure according to inv reynolds #, otherwise bulk is not regulated
 
 /**************************************************************************************************************************************************\
@@ -155,8 +156,11 @@ const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u, const FLUID_VELOCITY * const __restrict__ up,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION dz, PRECISION etabar
 ) {
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -187,7 +191,11 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx, PRECISION dy, PRECISION d
 				loadSourceTerms2(Q, S, u, up->ut[s], up->ux[s], up->uy[s], up->un[s], t, e[s], p, s, ncx, ncy, ncz, etabar, dt, dx, dy, dz);
 
 				PRECISION result[NUMBER_CONSERVED_VARIABLES];
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) = *(Q+n) + dt * ( *(S+n) );
 				}
 
@@ -220,8 +228,11 @@ const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx
 ) {
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -258,26 +269,46 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dx
 
 				PRECISION result[NUMBER_CONSERVED_VARIABLES];
 				flux(I, H, &rightHalfCellExtrapolationForward, &leftHalfCellExtrapolationForward, &spectralRadiusX, &Fx, t, e[s]);
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) = - *(H+n);
 				}
 				flux(I, H, &rightHalfCellExtrapolationBackwards, &leftHalfCellExtrapolationBackwards, &spectralRadiusX, &Fx, t, e[s]);
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) += *(H+n);
 					*(result+n) /= dx;
 				}
 #ifndef IDEAL
 				loadSourceTermsX(I, H, u, s, dx);
-				for (unsigned int n = 0; n < 4; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < 4; ++n)
+				{
 					*(result+n) += *(H+n);
 					*(result+n) *= dt;
 				}
 #else
-				for (unsigned int n = 0; n < 4; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < 4; ++n)
+				{
 					*(result+n) *= dt;
 				}
 #endif
-				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) *= dt;
 				}
 
@@ -310,8 +341,11 @@ const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy
 ) {
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -348,26 +382,45 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dy
 
 				PRECISION result[NUMBER_CONSERVED_VARIABLES];
 				flux(J, H, &rightHalfCellExtrapolationForward, &leftHalfCellExtrapolationForward, &spectralRadiusY, &Fy, t, e[s]);
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) = - *(H+n);
 				}
 				flux(J, H, &rightHalfCellExtrapolationBackwards, &leftHalfCellExtrapolationBackwards, &spectralRadiusY, &Fy, t, e[s]);
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) += *(H+n);
 					*(result+n) /= dy;
 				}
 #ifndef IDEAL
 				loadSourceTermsY(J, H, u, s, dy);
-				for (unsigned int n = 0; n < 4; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < 4; ++n)
+				{
 					*(result+n) += *(H+n);
 					*(result+n) *= dt;
 				}
 #else
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
 				for (unsigned int n = 0; n < 4; ++n) {
 					*(result+n) *= dt;
 				}
 #endif
-				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) *= dt;
 				}
 
@@ -400,8 +453,11 @@ const CONSERVED_VARIABLES * const __restrict__ currrentVars, CONSERVED_VARIABLES
 const FLUID_VELOCITY * const __restrict__ u, const PRECISION * const __restrict__ e,
 int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 ) {
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -439,26 +495,46 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 
 				PRECISION result[NUMBER_CONSERVED_VARIABLES];
 				flux(K, H, &rightHalfCellExtrapolationForward, &leftHalfCellExtrapolationForward, &spectralRadiusZ, &Fz, t, e[s]);
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) = -*(H+n);
 				}
 				flux(K, H, &rightHalfCellExtrapolationBackwards, &leftHalfCellExtrapolationBackwards, &spectralRadiusZ, &Fz, t, e[s]);
-				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) += *(H+n);
 					*(result+n) /= dz;
 				}
 #ifndef IDEAL
 				loadSourceTermsZ(K, H, u, s, t, dz);
-				for (unsigned int n = 0; n < 4; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < 4; ++n)
+				{
 					*(result+n) += *(H+n);
 					*(result+n) *= dt;
 				}
 #else
-				for (unsigned int n = 0; n < 4; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 0; n < 4; ++n)
+				{
 					*(result+n) *= dt;
 				}
 #endif
-				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n) {
+				#ifdef SIMD
+				#pragma omp simd
+				#endif
+				for (unsigned int n = 4; n < NUMBER_CONSERVED_VARIABLES; ++n)
+				{
 					*(result+n) *= dt;
 				}
 
@@ -491,8 +567,11 @@ int ncx, int ncy, int ncz, PRECISION dt, PRECISION dz
 void convexCombinationEulerStepKernel(const CONSERVED_VARIABLES * const __restrict__ q, CONSERVED_VARIABLES * const __restrict__ Q,
 int ncx, int ncy, int ncz
 ) {
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
@@ -545,8 +624,11 @@ const PRECISION * const __restrict__ e, const PRECISION * const __restrict__ p,
 const FLUID_VELOCITY * const __restrict__ u,
 int ncx, int ncy, int ncz
 ) {
+	//#ifdef SIMD
 	//#pragma omp parallel for simd collapse(3)
+	//#else
 	#pragma omp parallel for collapse(3)
+	//#endif
 	for(int i = 2; i < ncx-2; ++i) {
 		for(int j = 2; j < ncy-2; ++j) {
 			for(int k = 2; k < ncz-2; ++k) {
